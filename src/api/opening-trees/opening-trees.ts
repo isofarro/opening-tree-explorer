@@ -5,16 +5,19 @@ import type { OpeningTree, OpeningTreePosition, OpeningTreePositionResponse } fr
 import { transformToOpeningTreePosition } from './transformers';
 
 const getOpeningTrees = async () => {
-    return await ApiClient.get<OpeningTree>(MicroServices.OPENING_TREES, '/');
+  return await ApiClient.get<OpeningTree>(MicroServices.OPENING_TREES, '/');
 };
 
 const getPositionByFen = async (tree: string, fen: FenString): Promise<OpeningTreePosition> => {
-    const encodedFen = encodeURIComponent(fen);
-    const response = await ApiClient.get<OpeningTreePositionResponse>(MicroServices.OPENING_TREES, `/${tree}/${encodedFen}`);
-    return transformToOpeningTreePosition(response);
+  const encodedFen = encodeURIComponent(fen);
+  const response = await ApiClient.get<OpeningTreePositionResponse>(
+    MicroServices.OPENING_TREES,
+    `/${tree}/${encodedFen}`
+  );
+  return transformToOpeningTreePosition(response);
 };
 
 export const openingTrees = {
-    getOpeningTrees,
-    getPositionByFen,
+  getOpeningTrees,
+  getPositionByFen,
 };
