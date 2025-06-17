@@ -32,10 +32,10 @@ export const ExplorerPane = () => {
 
   return (
     <div className="explorer-pane" style={{ display: 'flex', flexDirection: 'row' }}>
-      <div className="board-container">
+      <div className="board-container" style={{ width: '600px' }}>
         <Chessground width={560} height={560} ref={apiRef} />
       </div>
-      <div className="tree-table">
+      <div className="tree-table" style={{ width: '400px' }}>
         {treePos !== undefined && <PositionTable treePos={treePos} />}
       </div>
     </div>
