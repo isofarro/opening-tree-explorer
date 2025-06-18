@@ -11,7 +11,6 @@ import type { OpeningTreePosition } from '../../../api/types';
 // import { START_POSITION_FEN } from '../../../core/constants';
 import { PositionTable } from './PositionTable';
 import type { FenString } from '../../../core/types';
-import { START_POSITION_FEN } from '../../../core/constants';
 
 type ExplorerPaneProps = {
   tree: string;
