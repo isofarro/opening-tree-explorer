@@ -33,11 +33,12 @@ export const ExplorerPane = ({
   const [currentFen, setCurrentFen] = useState<FenString>(position);
 
   useEffect(() => {
-    // Initialize board and fetch initial position
     if (apiRef.current) {
       apiRef.current.set({ fen: currentFen });
     }
+  }, [apiRef.current, currentFen]);
 
+  useEffect(() => {
     const fetchPosition = async () => {
       const treePosition = await Api.openingTrees.getPositionByFen(tree, currentFen);
       console.log('getPositionByFen:', treePosition);
