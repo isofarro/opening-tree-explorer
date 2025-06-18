@@ -2,9 +2,10 @@ import type { OpeningTreePosition } from '../../../api/types';
 
 type PositionTableProps = {
   treePos: OpeningTreePosition;
+  onSelectMove?: (move: string) => void;
 };
 
-export const PositionTable = ({ treePos }: PositionTableProps) => {
+export const PositionTable = ({ treePos, onSelectMove }: PositionTableProps) => {
   return (
     <table cellPadding={4}>
       <thead>
@@ -20,7 +21,11 @@ export const PositionTable = ({ treePos }: PositionTableProps) => {
       <tbody>
         {treePos.moves.map((move) => (
           <tr key={move.move}>
-            <td align="right">{move.move}</td>
+            <td align="right">
+              <a href="#" onClick={() => onSelectMove?.(move.move)}>
+                {move.move}
+              </a>
+            </td>
             <td align="right">{move.totalGames}</td>
             <td align="right">
               {move.whiteWins} / {move.draws} / {move.blackWins}
