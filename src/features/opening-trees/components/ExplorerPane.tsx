@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Chessground, {
   type Api as ChessgroundApi,
@@ -38,15 +38,15 @@ export const ExplorerPane = ({
     }
   }, [apiRef.current, currentFen]);
 
-  useEffect(() => {
-    const fetchPosition = async () => {
-      const treePosition = await Api.openingTrees.getPositionByFen(tree, currentFen);
-      console.log('getPositionByFen:', treePosition);
-      setTreePos(treePosition);
-    };
-
-    fetchPosition();
+  const fetchPosition = useCallback(async () => {
+    const treePosition = await Api.openingTrees.getPositionByFen(tree, currentFen);
+    console.log('getPositionByFen:', treePosition);
+    setTreePos(treePosition);
   }, [currentFen, tree]);
+
+  useEffect(() => {
+    fetchPosition();
+  }, [fetchPosition]);
 
   const handleMove = (move: string) => {
     const game = gameRef.current;
