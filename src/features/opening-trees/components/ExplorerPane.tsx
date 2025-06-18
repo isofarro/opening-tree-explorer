@@ -30,30 +30,29 @@ export const ExplorerPane = ({
   const gameRef = useRef(createChessFromFen(position));
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
   const [treePos, setTreePos] = useState<OpeningTreePosition | undefined>(undefined);
+  const [currentFen, setCurrentFen] = useState<FenString>(position);
 
   useEffect(() => {
-    const currentFen = gameRef.current.fen();
-    window.console.log('[EXPLORER] useEffect fen:', currentFen);
-    Api.openingTrees.getPositionByFen(tree, currentFen).then((treePos) => {
-      console.log('getPositionByFen:', treePos);
-      setTreePos(treePos);
-    });
-  }, []);
-
-  useEffect(() => {
+    // Initialize board and fetch initial position
     if (apiRef.current) {
-      apiRef.current.set({ fen: gameRef.current.fen() });
+      apiRef.current.set({ fen: currentFen });
     }
-  }, [apiRef.current]);
+
+    const fetchPosition = async () => {
+      const treePosition = await Api.openingTrees.getPositionByFen(tree, currentFen);
+      console.log('getPositionByFen:', treePosition);
+      setTreePos(treePosition);
+    };
+
+    fetchPosition();
+  }, [currentFen, tree]);
 
   const handleMove = (move: string) => {
-    gameRef.current.move(move);
+    const game = gameRef.current;
+    game.move(move);
+    const newFen = game.fen();
+    setCurrentFen(newFen);
     setTreePos(undefined);
-    apiRef.current?.set({ fen: gameRef.current.fen() });
-    Api.openingTrees.getPositionByFen(tree, gameRef.current.fen()).then((treePos) => {
-      console.log('getPositionByFen:', treePos);
-      setTreePos(treePos);
-    });
   };
 
   return (
