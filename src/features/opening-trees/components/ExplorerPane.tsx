@@ -31,6 +31,7 @@ export const ExplorerPane = ({
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
   const [treePos, setTreePos] = useState<OpeningTreePosition | undefined>(undefined);
   const [currentFen, setCurrentFen] = useState<FenString>(position);
+  const lastFetchedFen = useRef<FenString | null>(null);
 
   useEffect(() => {
     if (apiRef.current) {
@@ -39,6 +40,8 @@ export const ExplorerPane = ({
   }, [apiRef.current, currentFen]);
 
   const fetchPosition = useCallback(async () => {
+    if (lastFetchedFen.current === currentFen) return;
+    lastFetchedFen.current = currentFen;
     const treePosition = await Api.openingTrees.getPositionByFen(tree, currentFen);
     console.log('getPositionByFen:', treePosition);
     setTreePos(treePosition);
