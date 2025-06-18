@@ -3,32 +3,44 @@ import { useEffect, useRef, useState } from 'react';
 import Chessground, {
   type Api as ChessgroundApi,
 } from '../../../third-party/react-chessground/Chessground';
+import { Chess } from 'chess.ts';
 
 import { Api } from '../../../api';
 import type { OpeningTreePosition } from '../../../api/types';
 
 // import { START_POSITION_FEN } from '../../../core/constants';
 import { PositionTable } from './PositionTable';
+import type { FenString } from '../../../core/types';
+
+type ExplorerPaneProps = {
+  tree: string;
+}
 
 const FEN_CLOSED_RUY_LOPEZ = 'r1bq1rk1/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N1P/PP1P1PP1/RNBQR1K1 b - -';
 
-export const ExplorerPane = () => {
-  const [fen, setFen] = useState(FEN_CLOSED_RUY_LOPEZ);
+const createChessFromFen = (fen: FenString): Chess => {
+  return new Chess(fen + ' 0 1');
+}
+
+export const ExplorerPane = ({ tree = 'twic-2025'}: ExplorerPaneProps) => {
+  const gameRef = useRef(createChessFromFen(FEN_CLOSED_RUY_LOPEZ));
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
   const [treePos, setTreePos] = useState<OpeningTreePosition | undefined>(undefined);
 
   useEffect(() => {
-    window.console.log('[EXPLORER] useEffect fen:', fen);
-    Api.openingTrees.getPositionByFen('twic-2025', fen).then((treePos) => {
+    const currentFen = gameRef.current.fen();
+    window.console.log('[EXPLORER] useEffect fen:', currentFen);
+    Api.openingTrees.getPositionByFen(tree, currentFen).then((treePos) => {
       console.log('getPositionByFen:', treePos);
       setTreePos(treePos);
     });
-    apiRef.current?.set({ fen });
-  }, [fen]);
+  }, []);
 
   useEffect(() => {
-    apiRef.current?.set({ fen });
-  }, [apiRef.current, fen]);
+    if (apiRef.current) {
+      apiRef.current.set({ fen: gameRef.current.fen() });
+    }
+  }, [apiRef.current]);
 
   return (
     <div className="explorer-pane" style={{ display: 'flex', flexDirection: 'row' }}>
