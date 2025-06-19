@@ -31,7 +31,7 @@ export const PositionTable = ({ treePos, onSelectMove }: PositionTableProps) => 
               {move.whiteWins} / {move.draws} / {move.blackWins}
             </td>
             <td align="center">{move.rating}</td>
-            <td>
+            <td align="right">
               {move.performance > move.rating && '+'}
               {move.performance - move.rating}
             </td>
