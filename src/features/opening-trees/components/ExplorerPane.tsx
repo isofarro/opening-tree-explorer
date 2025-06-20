@@ -11,13 +11,12 @@ import type { OpeningTreePosition } from '../../../api/types';
 // import { START_POSITION_FEN } from '../../../core/constants';
 import { PositionTable } from './PositionTable';
 import type { FenString } from '../../../core/types';
+import { START_POSITION_FEN } from '../../../core/constants';
 
 type ExplorerPaneProps = {
   tree: string;
   position?: FenString;
 };
-
-const FEN_CLOSED_RUY_LOPEZ = 'r1bq1rk1/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N1P/PP1P1PP1/RNBQR1K1 b - -';
 
 const createChessFromFen = (fen: FenString): Chess => {
   return new Chess(fen + ' 0 1');
@@ -25,7 +24,7 @@ const createChessFromFen = (fen: FenString): Chess => {
 
 export const ExplorerPane = ({
   tree = 'twic-2025',
-  position = FEN_CLOSED_RUY_LOPEZ,
+  position = START_POSITION_FEN,
 }: ExplorerPaneProps) => {
   const gameRef = useRef(createChessFromFen(position));
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
@@ -64,7 +63,7 @@ export const ExplorerPane = ({
       <div className="board-container" style={{ width: '600px' }}>
         <Chessground width={560} height={560} ref={apiRef} />
       </div>
-      <div className="tree-table" style={{ width: '492px' }}>
+      <div className="tree-table" style={{ width: '512px', height: '560px', overflowY: 'auto' }}>
         {treePos !== undefined && <PositionTable treePos={treePos} onSelectMove={handleMove} />}
       </div>
     </div>
