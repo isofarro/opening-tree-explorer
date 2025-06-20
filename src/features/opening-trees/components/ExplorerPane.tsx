@@ -64,7 +64,7 @@ export const ExplorerPane = ({
       <div className="board-container" style={{ width: '600px' }}>
         <Chessground width={560} height={560} ref={apiRef} />
       </div>
-      <div className="tree-table" style={{ width: '480px' }}>
+      <div className="tree-table" style={{ width: '492px' }}>
         {treePos !== undefined && <PositionTable treePos={treePos} onSelectMove={handleMove} />}
       </div>
     </div>

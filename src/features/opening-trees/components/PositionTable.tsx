@@ -22,7 +22,7 @@ export const PositionTable = ({ treePos, onSelectMove }: PositionTableProps) => 
         {treePos.moves.map((move) => (
           <tr key={move.move}>
             <td align="right">
-              <a href="#" onClick={() => onSelectMove?.(move.move)}>
+              <a href="#" onClick={(e) => { onSelectMove?.(move.move); e.preventDefault()}}>
                 {move.move}
               </a>
             </td>
