@@ -6,6 +6,8 @@ type PositionTableProps = {
 };
 
 export const PositionTable = ({ treePos, onSelectMove }: PositionTableProps) => {
+  const isWhiteToMove = treePos.fen.split(' ')[1] === 'w';
+
   return (
     <table cellPadding={4}>
       <thead>
@@ -34,7 +36,9 @@ export const PositionTable = ({ treePos, onSelectMove }: PositionTableProps) => 
             </td>
             <td align="right">{move.totalGames}</td>
             <td align="right">
-              {move.whiteWins} / {move.draws} / {move.blackWins}
+              {isWhiteToMove
+                ? `${move.whiteWins} / ${move.draws} / ${move.blackWins}`
+                : `${move.blackWins} / ${move.draws} / ${move.whiteWins}`}
             </td>
             <td align="center">{move.rating}</td>
             <td align="right">
