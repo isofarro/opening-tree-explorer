@@ -41,7 +41,7 @@ export const ExplorerPane = ({
     const game = gameRef.current;
     const madeMove = game.move(move);
     if (madeMove === null) {
-      console.warn("Move not found in current position:", move);
+      console.warn('Move not found in current position:', move);
       return;
     }
 
@@ -54,7 +54,9 @@ export const ExplorerPane = ({
         <Chessground width={560} height={560} ref={apiRef} />
       </div>
       <div className="tree-table" style={{ width: '512px', height: '560px', overflowY: 'auto' }}>
-        {currentPos !== undefined && <PositionTable treePos={currentPos} onSelectMove={handleMove} />}
+        {currentPos !== undefined && (
+          <PositionTable treePos={currentPos} onSelectMove={handleMove} />
+        )}
       </div>
     </div>
   );

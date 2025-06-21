@@ -15,15 +15,18 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
 
   const lastFetchedFen = useRef<FenString | null>(null);
 
-  const fetchPosition = useCallback(async (newFen: FenString) => {
-    if (lastFetchedFen.current === newFen) return;
-    lastFetchedFen.current = newFen;
+  const fetchPosition = useCallback(
+    async (newFen: FenString) => {
+      if (lastFetchedFen.current === newFen) return;
+      lastFetchedFen.current = newFen;
 
-    const treePosition = await Api.openingTrees.getPositionByFen(treeName, newFen);
-    console.log('getPositionByFen:', treePosition);
-    setCurrentPos(treePosition);
-    setCurrentFen(newFen);
-  }, [treeName]);
+      const treePosition = await Api.openingTrees.getPositionByFen(treeName, newFen);
+      console.log('getPositionByFen:', treePosition);
+      setCurrentPos(treePosition);
+      setCurrentFen(newFen);
+    },
+    [treeName]
+  );
 
   useEffect(() => {
     console.log('[USEEFFECT] fetchPosition');
@@ -36,7 +39,7 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
     // Find the move in the current position info
     const toPos = currentPos?.moves.find((m) => m.move === move);
     if (!toPos) {
-      console.warn("Move not found in current position:", move);
+      console.warn('Move not found in current position:', move);
       return;
     }
     fetchPosition(toPos.fen);
