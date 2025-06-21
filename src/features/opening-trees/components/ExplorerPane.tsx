@@ -12,6 +12,7 @@ import type { OpeningTreePosition } from '../../../api/types';
 import { PositionTable } from './PositionTable';
 import type { FenString } from '../../../core/types';
 import { START_POSITION_FEN } from '../../../core/constants';
+import { useTree } from '../hooks/useTree';
 
 type ExplorerPaneProps = {
   tree: string;
@@ -28,9 +29,7 @@ export const ExplorerPane = ({
 }: ExplorerPaneProps) => {
   const gameRef = useRef(createChessFromFen(position));
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
-  const [treePos, setTreePos] = useState<OpeningTreePosition | undefined>(undefined);
-  const [currentFen, setCurrentFen] = useState<FenString>(position);
-  const lastFetchedFen = useRef<FenString | null>(null);
+  const { makeMove, currentFen, currentPos } = useTree(tree, position);
 
   useEffect(() => {
     if (apiRef.current) {
@@ -38,24 +37,15 @@ export const ExplorerPane = ({
     }
   }, [apiRef.current, currentFen]);
 
-  const fetchPosition = useCallback(async () => {
-    if (lastFetchedFen.current === currentFen) return;
-    lastFetchedFen.current = currentFen;
-    const treePosition = await Api.openingTrees.getPositionByFen(tree, currentFen);
-    console.log('getPositionByFen:', treePosition);
-    setTreePos(treePosition);
-  }, [currentFen, tree]);
-
-  useEffect(() => {
-    fetchPosition();
-  }, [fetchPosition]);
-
   const handleMove = (move: string) => {
     const game = gameRef.current;
-    game.move(move);
-    const newFen = game.fen();
-    setCurrentFen(newFen);
-    setTreePos(undefined);
+    const madeMove = game.move(move);
+    if (madeMove === null) {
+      console.warn("Move not found in current position:", move);
+      return;
+    }
+
+    makeMove(move);
   };
 
   return (
@@ -64,7 +54,7 @@ export const ExplorerPane = ({
         <Chessground width={560} height={560} ref={apiRef} />
       </div>
       <div className="tree-table" style={{ width: '512px', height: '560px', overflowY: 'auto' }}>
-        {treePos !== undefined && <PositionTable treePos={treePos} onSelectMove={handleMove} />}
+        {currentPos !== undefined && <PositionTable treePos={currentPos} onSelectMove={handleMove} />}
       </div>
     </div>
   );
