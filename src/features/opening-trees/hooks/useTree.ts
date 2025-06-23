@@ -39,7 +39,8 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
     // Find the move in the current position info
     const toPos = currentPos?.moves.find((m) => m.move === move);
     if (!toPos) {
-      console.warn('Move not found in current position:', move);
+      // TODO: Legal move is not in tree...
+      console.warn('Move not found in position tree:', move);
       return;
     }
     fetchPosition(toPos.fen);
