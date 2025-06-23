@@ -4,7 +4,6 @@ import type { OpeningTreePosition } from '../../../api/types';
 import { Api } from '../../../api';
 
 type UseTreeProps = {
-  currentFen: FenString;
   currentPos: OpeningTreePosition | undefined;
   makeMove: (move: string) => boolean;
 };
@@ -46,7 +45,6 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
   };
 
   return {
-    currentFen,
     currentPos,
     makeMove,
   };

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Chess } from 'chess.ts';
 import Chessground, {
@@ -42,7 +42,9 @@ export const ExplorerPane = ({
 }: ExplorerPaneProps) => {
   const gameRef = useRef(createChessFromFen(position));
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
-  const { makeMove, currentFen, currentPos } = useTree(tree, position);
+
+  const [currentFen, setCurrentFen] = useState<FenString>(position);
+  const { makeMove, currentPos } = useTree(tree, position);
 
   useEffect(() => {
     if (apiRef.current) {
@@ -58,10 +60,11 @@ export const ExplorerPane = ({
       return;
     }
 
+    // Update the current position
+    setCurrentFen(game.fen());
+
+    // Update the position tree.
     const isInTree = makeMove(move);
-    if (!isInTree) {
-      // Set the FEN from the game....
-    }
   };
 
   const boardConfig: ChessgroundConfig = {
