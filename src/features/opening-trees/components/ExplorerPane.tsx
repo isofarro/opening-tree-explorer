@@ -53,13 +53,15 @@ export const ExplorerPane = ({
   const handleMove = (move: string) => {
     const game = gameRef.current;
     const madeMove = game.move(move);
-    console.log('[MOVE]', move, madeMove);
     if (madeMove === null) {
-      console.warn('ZZZMove not found in current position:', move);
+      console.warn('Move not found in current position:', move);
       return;
     }
 
-    makeMove(move);
+    const isInTree = makeMove(move);
+    if (!isInTree) {
+      // Set the FEN from the game....
+    }
   };
 
   const boardConfig: ChessgroundConfig = {

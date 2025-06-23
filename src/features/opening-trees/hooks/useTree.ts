@@ -6,7 +6,7 @@ import { Api } from '../../../api';
 type UseTreeProps = {
   currentFen: FenString;
   currentPos: OpeningTreePosition | undefined;
-  makeMove: (move: string) => void;
+  makeMove: (move: string) => boolean;
 };
 
 export const useTree = (treeName: string, startFen: FenString): UseTreeProps => {
@@ -35,15 +35,14 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
     }
   }, [currentFen, treeName]);
 
-  const makeMove = (move: string) => {
+  const makeMove = (move: string): boolean => {
     // Find the move in the current position info
     const toPos = currentPos?.moves.find((m) => m.move === move);
     if (!toPos) {
-      // TODO: Legal move is not in tree...
-      console.warn('Move not found in position tree:', move);
-      return;
+      return false;
     }
     fetchPosition(toPos.fen);
+    return true;
   };
 
   return {
