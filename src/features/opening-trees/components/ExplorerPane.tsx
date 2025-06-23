@@ -1,17 +1,16 @@
 import { useEffect, useRef } from 'react';
 
+import { Chess } from 'chess.ts';
 import Chessground, {
   type Api as ChessgroundApi,
   type Config as ChessgroundConfig,
 } from '../../../third-party/react-chessground/Chessground';
-import { Chess } from 'chess.ts';
+import type { Key } from 'chessground/types';
 
-// import { START_POSITION_FEN } from '../../../core/constants';
-import { PositionTable } from './PositionTable';
 import type { FenString } from '../../../core/types';
-import { START_POSITION_FEN } from '../../../core/constants';
 import { useTree } from '../hooks/useTree';
-import type { MoveMetadata, Key } from 'chessground/types';
+import { PositionTable } from './PositionTable';
+import { START_POSITION_FEN } from '../../../core/constants';
 
 function toDests(chess: Chess): Map<Key, Key[]> {
   const dests = new Map();
@@ -71,8 +70,8 @@ export const ExplorerPane = ({
       events: {
         after: (orig: Key, dest: Key) => {
           const game = gameRef.current;
-          const move = game.move(`${orig}${dest}`, { sloppy: true });
-          move && makeMove(move.san);
+          const move = game.move({ from: orig, to: dest }, { dry_run: true });
+          move && handleMove(move.san);
         },
       },
     },
