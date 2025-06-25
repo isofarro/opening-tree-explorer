@@ -10,6 +10,7 @@ import type { Key } from 'chessground/types';
 import type { FenString } from '../../../core/types';
 import { useTree } from '../hooks/useTree';
 import { PositionTable } from './PositionTable';
+import { Moves } from './Moves';
 import { START_POSITION_FEN } from '../../../core/constants';
 
 function toDests(chess: Chess): Map<Key, Key[]> {
@@ -33,7 +34,9 @@ type ExplorerPaneProps = {
 };
 
 const createChessFromFen = (fen: FenString): Chess => {
-  return new Chess(fen + ' 0 1');
+  // If FEN already has move counters, use it as is, otherwise append them
+  const hasCounters = fen.split(' ').length > 4;
+  return new Chess(hasCounters ? fen : fen + ' 0 1');
 };
 
 export const ExplorerPane = ({
@@ -44,13 +47,20 @@ export const ExplorerPane = ({
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
 
   const [currentFen, setCurrentFen] = useState<FenString>(position);
-  const { makeMove, currentPos } = useTree(tree, position);
+  const [moves, setMoves] = useState<Array<{ move: string; fen: string }>>([]);
+  const { makeMove, currentPos, setPosition } = useTree(tree, position);
 
   useEffect(() => {
     if (apiRef.current) {
       apiRef.current.set({ fen: currentFen });
     }
   }, [apiRef.current, currentFen]);
+
+  const handleSetPosition = (fen: FenString) => {
+    gameRef.current = createChessFromFen(fen);
+    setCurrentFen(fen);
+    setPosition(fen);
+  };
 
   const handleMove = (move: string) => {
     const game = gameRef.current;
@@ -61,7 +71,11 @@ export const ExplorerPane = ({
     }
 
     // Update the current position
-    setCurrentFen(game.fen());
+    const newFen = game.fen();
+    setCurrentFen(newFen);
+
+    // Add the move and its FEN to the moves array
+    setMoves((prevMoves) => [...prevMoves, { move, fen: newFen }]);
 
     // Update the position tree.
     const isInTree = makeMove(move);
@@ -89,6 +103,7 @@ export const ExplorerPane = ({
     <div className="explorer-pane" style={{ display: 'flex', flexDirection: 'row' }}>
       <div className="board-container" style={{ width: '600px' }}>
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
+        <Moves moves={moves} onMoveClick={handleSetPosition} />
       </div>
       <div className="tree-table" style={{ width: '512px', height: '560px', overflowY: 'auto' }}>
         {currentPos !== undefined && (

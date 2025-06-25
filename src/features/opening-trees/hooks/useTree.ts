@@ -6,6 +6,7 @@ import { Api } from '../../../api';
 type UseTreeProps = {
   currentPos: OpeningTreePosition | undefined;
   makeMove: (move: string) => boolean;
+  setPosition: (fen: FenString) => boolean;
 };
 
 export const useTree = (treeName: string, startFen: FenString): UseTreeProps => {
@@ -40,12 +41,17 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
     if (!toPos) {
       return false;
     }
-    fetchPosition(toPos.fen);
+    return setPosition(toPos.fen);
+  };
+
+  const setPosition = (fen: FenString): boolean => {
+    fetchPosition(fen);
     return true;
   };
 
   return {
     currentPos,
     makeMove,
+    setPosition,
   };
 };
