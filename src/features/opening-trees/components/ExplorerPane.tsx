@@ -31,6 +31,7 @@ function toDests(chess: Chess): Map<Key, Key[]> {
 type ExplorerPaneProps = {
   tree: string;
   position?: FenString;
+  moveNum?: number;
 };
 
 const createChessFromFen = (fen: FenString): Chess => {
@@ -42,6 +43,7 @@ const createChessFromFen = (fen: FenString): Chess => {
 export const ExplorerPane = ({
   tree = 'twic-2025',
   position = START_POSITION_FEN,
+  moveNum = 1,
 }: ExplorerPaneProps) => {
   const gameRef = useRef(createChessFromFen(position));
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
@@ -103,7 +105,7 @@ export const ExplorerPane = ({
     <div className="explorer-pane" style={{ display: 'flex', flexDirection: 'row' }}>
       <div className="board-container" style={{ width: '600px' }}>
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
-        <Moves moves={moves} onMoveClick={handleSetPosition} />
+        <Moves moves={moves} onMoveClick={handleSetPosition} moveNum={moveNum} />
       </div>
       <div className="tree-table" style={{ width: '512px', height: '560px', overflowY: 'auto' }}>
         {currentPos !== undefined && (
