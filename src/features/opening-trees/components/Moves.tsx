@@ -7,14 +7,17 @@ type MovesProps = {
 };
 
 export const Moves: React.FC<MovesProps> = ({ moves, onMoveClick, moveNum = 1 }) => {
+  const isFirstMoveBlack = moves[0] && !moves[0].fen.includes(' b ');
+  const firstMoveOffset = isFirstMoveBlack ? 1 : 0;
   return (
     <div className="moves-list" style={{ padding: '10px' }}>
+      {moves.length > 0 && isFirstMoveBlack && (
+        <span style={{ marginRight: '4px' }}>{moveNum}...</span>
+      )}
       {moves.map((move, index) => {
         const isWhiteMove = move.fen.includes(' b ');
-        const showMoveNumber = isWhiteMove || index === 0;
-        const firstMoveIsBlack = moves[0] && !moves[0].fen.includes(' b ');
-        const adjustedIndex = firstMoveIsBlack ? index + 1 : index;
-        const currentMoveNum = moveNum + Math.floor(adjustedIndex / 2);
+        const currentMoveNum = moveNum + Math.floor((index + (firstMoveOffset)) / 2);
+        const showMoveNumber = isWhiteMove;
 
         return (
           <React.Fragment key={index}>
