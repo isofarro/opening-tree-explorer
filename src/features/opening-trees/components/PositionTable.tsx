@@ -3,9 +3,10 @@ import type { OpeningTreePosition } from '../../../api/types';
 type PositionTableProps = {
   treePos: OpeningTreePosition;
   onSelectMove?: (move: string) => void;
+  moveNum?: number;
 };
 
-export const PositionTable = ({ treePos, onSelectMove }: PositionTableProps) => {
+export const PositionTable = ({ treePos, onSelectMove, moveNum = 1 }: PositionTableProps) => {
   const isWhiteToMove = treePos.fen.split(' ')[1] === 'w';
 
   return (
@@ -23,7 +24,7 @@ export const PositionTable = ({ treePos, onSelectMove }: PositionTableProps) => 
       <tbody>
         {treePos.moves.map((move) => (
           <tr key={move.move}>
-            <td align="right">
+            <td align="left">
               <a
                 href="#"
                 onClick={(e) => {
@@ -31,7 +32,7 @@ export const PositionTable = ({ treePos, onSelectMove }: PositionTableProps) => 
                   e.preventDefault();
                 }}
               >
-                {move.move}
+                {isWhiteToMove ? `${moveNum}.` : `${moveNum}…`} {move.move}
               </a>
             </td>
             <td align="right">{move.totalGames}</td>

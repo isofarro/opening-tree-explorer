@@ -12,7 +12,7 @@ export const Moves: React.FC<MovesProps> = ({ moves, onMoveClick, moveNum = 1 })
   return (
     <div className="moves-list" style={{ padding: '10px' }}>
       {moves.length > 0 && isFirstMoveBlack && (
-        <span style={{ marginRight: '4px' }}>{moveNum}...</span>
+        <span style={{ marginRight: '4px' }}>{moveNum}…</span>
       )}
       {moves.map((move, index) => {
         const isWhiteMove = move.fen.includes(' b ');
@@ -24,7 +24,7 @@ export const Moves: React.FC<MovesProps> = ({ moves, onMoveClick, moveNum = 1 })
             {showMoveNumber && (
               <span style={{ marginRight: '4px' }}>
                 {currentMoveNum}
-                {index === 0 && !isWhiteMove ? '...' : '.'}
+                {index === 0 && !isWhiteMove ? '…' : '.'}
               </span>
             )}
             <span

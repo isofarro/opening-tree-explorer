@@ -101,6 +101,12 @@ export const ExplorerPane = ({
     },
   };
 
+  const isBlackFirstMove = position.split(' ')[1] === 'b';
+  const isWhiteMove = currentPos?.fen.split(' ')[1] === 'w';
+  const movesMade = Math.floor(moves.length / 2);
+  const blackFirstMoveOffset = isBlackFirstMove && isWhiteMove ? 1 : 0;
+  const currentMoveNum = moveNum + movesMade + blackFirstMoveOffset;
+
   return (
     <div className="explorer-pane" style={{ display: 'flex', flexDirection: 'row' }}>
       <div className="board-container" style={{ width: '600px' }}>
@@ -109,7 +115,7 @@ export const ExplorerPane = ({
       </div>
       <div className="tree-table" style={{ width: '512px', height: '560px', overflowY: 'auto' }}>
         {currentPos !== undefined && (
-          <PositionTable treePos={currentPos} onSelectMove={handleMove} />
+          <PositionTable treePos={currentPos} onSelectMove={handleMove} moveNum={currentMoveNum} />
         )}
       </div>
     </div>
