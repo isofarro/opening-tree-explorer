@@ -11,7 +11,7 @@ const FEN_CLOSED_RUY_LOPEZ = 'r1bq1rk1/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N1P/PP1P1PP
 export const App = () => {
   return (
     <div className="App">
-      <ExplorerPane tree="twic-2025" position={FEN_CLOSED_RUY_LOPEZ} />
+      <ExplorerPane tree="twic-2025" position={FEN_CLOSED_RUY_LOPEZ} moveNum={9} />
     </div>
   );
 };
