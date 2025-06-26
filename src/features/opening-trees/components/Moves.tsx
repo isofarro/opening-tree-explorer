@@ -16,7 +16,7 @@ export const Moves: React.FC<MovesProps> = ({ moves, onMoveClick, moveNum = 1 })
       )}
       {moves.map((move, index) => {
         const isWhiteMove = move.fen.includes(' b ');
-        const currentMoveNum = moveNum + Math.floor((index + (firstMoveOffset)) / 2);
+        const currentMoveNum = moveNum + Math.floor((index + firstMoveOffset) / 2);
         const showMoveNumber = isWhiteMove;
 
         return (
