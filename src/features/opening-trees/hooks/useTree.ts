@@ -13,26 +13,37 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
   const [currentFen, setCurrentFen] = useState<FenString>(startFen);
   const [currentPos, setCurrentPos] = useState<OpeningTreePosition | undefined>(undefined);
 
-  const lastFetchedFen = useRef<FenString | null>(null);
+  const positionCache = useRef<Map<FenString, OpeningTreePosition>>(new Map());
+
+  const updatePosition = useCallback(
+    (position: OpeningTreePosition, fen: FenString, source: string) => {
+      console.log(`${source}:`, position);
+      setCurrentPos(position);
+      setCurrentFen(fen);
+    },
+    []
+  );
 
   const fetchPosition = useCallback(
     async (newFen: FenString) => {
-      if (lastFetchedFen.current === newFen) return;
-      lastFetchedFen.current = newFen;
+      // Check if position is in cache
+      const cachedPosition = positionCache.current.get(newFen);
+      if (cachedPosition) {
+        updatePosition(cachedPosition, newFen, 'Cache hit');
+        return;
+      }
 
+      // Fetch from server if not in cache
       const treePosition = await Api.openingTrees.getPositionByFen(treeName, newFen);
-      console.log('getPositionByFen:', treePosition);
-      setCurrentPos(treePosition);
-      setCurrentFen(newFen);
+      positionCache.current.set(newFen, treePosition);
+      updatePosition(treePosition, newFen, 'getPositionByFen');
     },
-    [treeName]
+    [treeName, updatePosition]
   );
 
   useEffect(() => {
     console.log('[USEEFFECT] fetchPosition');
-    if (currentFen !== lastFetchedFen.current) {
-      fetchPosition(currentFen);
-    }
+    fetchPosition(currentFen);
   }, [currentFen, treeName]);
 
   const makeMove = (move: string): boolean => {
@@ -45,7 +56,7 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
   };
 
   const setPosition = (fen: FenString): boolean => {
-    fetchPosition(fen);
+    setCurrentFen(fen);
     return true;
   };
 
