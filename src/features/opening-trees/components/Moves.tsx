@@ -11,9 +11,11 @@ export const Moves: React.FC<MovesProps> = ({ moves, onMoveClick }) => {
     <div className="moves-list" style={{ padding: '10px' }}>
       {moves.map((move, index) => (
         <React.Fragment key={index}>
-          {move.moveNumStr && <span style={{ marginRight: '4px' }}>{move.moveNumStr}</span>}
+          {move.moveNumStr && (
+            <span style={{ marginRight: '4px', whiteSpace: 'nowrap' }}>{move.moveNumStr}</span>
+          )}
           <span
-            style={{ marginRight: '8px', cursor: 'pointer' }}
+            style={{ marginRight: '8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
             onClick={() => onMoveClick(move.fen)}
           >
             {move.move}
