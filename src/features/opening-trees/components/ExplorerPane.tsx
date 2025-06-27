@@ -12,6 +12,7 @@ import { useTree } from '../hooks/useTree';
 import { PositionTable } from './PositionTable';
 import { Moves } from './Moves';
 import { START_POSITION_FEN } from '../../../core/constants';
+import type { TreeMove } from '../types';
 
 function toDests(chess: Chess): Map<Key, Key[]> {
   const dests = new Map();
@@ -49,7 +50,7 @@ export const ExplorerPane = ({
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
 
   const [currentFen, setCurrentFen] = useState<FenString>(position);
-  const [moves, setMoves] = useState<Array<{ move: string; fen: string }>>([]);
+  const [moves, setMoves] = useState<TreeMove[]>([]);
   const { makeMove, currentPos, setPosition } = useTree(tree, position);
 
   useEffect(() => {
@@ -76,11 +77,21 @@ export const ExplorerPane = ({
     const newFen = game.fen();
     setCurrentFen(newFen);
 
-    // Add the move and its FEN to the moves array
-    setMoves((prevMoves) => [...prevMoves, { move, fen: newFen }]);
+    // Add the move and its FEN to the moves array with moveNum string
+    setMoves((prevMoves) => {
+      const isWhiteMove = newFen.includes(' b ');
+      const isFirstBlackMove = prevMoves.length === 0 && !isWhiteMove;
+      const prevMoveWasBlack =
+        prevMoves.length > 0 && !prevMoves[prevMoves.length - 1].fen.includes(' b ');
+      const currentMoveNum =
+        moveNum + Math.floor(prevMoves.length / 2) + (isWhiteMove && prevMoveWasBlack ? 1 : 0);
+      const moveNumStr =
+        isWhiteMove || isFirstBlackMove ? `${currentMoveNum}${isFirstBlackMove ? '…' : '.'}` : '';
+      return [...prevMoves, { move, fen: newFen, moveNumStr }];
+    });
 
     // Update the position tree.
-    const isInTree = makeMove(move);
+    makeMove(move);
   };
 
   const boardConfig: ChessgroundConfig = {
@@ -111,7 +122,7 @@ export const ExplorerPane = ({
     <div className="explorer-pane" style={{ display: 'flex', flexDirection: 'row' }}>
       <div className="board-container" style={{ width: '600px' }}>
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
-        <Moves moves={moves} onMoveClick={handleSetPosition} moveNum={moveNum} />
+        <Moves moves={moves} onMoveClick={handleSetPosition} />
       </div>
       <div className="tree-table" style={{ width: '512px', height: '560px', overflowY: 'auto' }}>
         {currentPos !== undefined && (

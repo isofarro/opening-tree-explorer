@@ -32,7 +32,7 @@ export const PositionTable = ({ treePos, onSelectMove, moveNum = 1 }: PositionTa
                   e.preventDefault();
                 }}
               >
-                {isWhiteToMove ? `${moveNum}.` : `${moveNum}…`} {move.move}
+                {`${isWhiteToMove ? `${moveNum}.` : `${moveNum}…`} ${move.move}`}
               </a>
             </td>
             <td align="right">{move.totalGames}</td>
