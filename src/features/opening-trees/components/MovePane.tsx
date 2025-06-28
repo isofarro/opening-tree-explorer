@@ -6,9 +6,10 @@ type MovePaneProps = {
   rootFen: FenString;
   graph: ChessGraph;
   moveNum: number;
+  onMoveClick: (fen: string) => void;
 };
 
-export const MovePane = ({ rootFen, graph, moveNum }: MovePaneProps) => {
+export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps) => {
   const renderMoves = (fen: FenString, currentMoveNum: number): JSX.Element | null => {
     const position = graph.nodes[fen];
     if (!position || position.moves.length === 0) {
@@ -26,8 +27,14 @@ export const MovePane = ({ rootFen, graph, moveNum }: MovePaneProps) => {
     return (
       <>
         <span className="move">
-          {moveNumStr} {firstMove.move}
-        </span>{' '}
+          {moveNumStr}
+          <span
+            style={{ marginRight: '8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            onClick={() => onMoveClick(firstMove.toFen)}
+          >
+            {firstMove.move}
+          </span>
+        </span>
         {renderMoves(firstMove.toFen, isWhiteMove ? currentMoveNum : currentMoveNum + 1)}
       </>
     );

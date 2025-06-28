@@ -138,7 +138,12 @@ export const ExplorerPane = ({
         style={{ width: '480px', height: '560px', display: 'flex', flexDirection: 'column' }}
       >
         <div style={{ flex: 1, borderBottom: '1px solid #999', overflowY: 'auto' }}>
-          <MovePane rootFen={position} graph={graphRef.current} moveNum={moveNum} />
+          <MovePane
+            rootFen={position}
+            graph={graphRef.current}
+            moveNum={moveNum}
+            onMoveClick={handleSetPosition}
+          />
         </div>
         {currentPos !== undefined && (
           <div style={{ flex: 1, overflowY: 'auto' }}>
