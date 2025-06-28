@@ -10,7 +10,7 @@ export const PositionTable = ({ treePos, onSelectMove, moveNum = 1 }: PositionTa
   const isWhiteToMove = treePos.fen.split(' ')[1] === 'w';
 
   return (
-    <table cellPadding={4}>
+    <table cellPadding={2} style={{ fontSize: '90%' }}>
       <thead>
         <tr>
           <th scope="column">Move</th>

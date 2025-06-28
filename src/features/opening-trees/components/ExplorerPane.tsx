@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { Chess } from 'chess.ts';
+import { ChessGraph } from '../../../core/graph/ChessGraph';
 import Chessground, {
   type Api as ChessgroundApi,
   type Config as ChessgroundConfig,
@@ -13,6 +14,7 @@ import { PositionTable } from './PositionTable';
 import { Moves } from './Moves';
 import { START_POSITION_FEN } from '../../../core/constants';
 import type { TreeMove } from '../types';
+import { MovePane } from './MovePane';
 
 function toDests(chess: Chess): Map<Key, Key[]> {
   const dests = new Map();
@@ -47,6 +49,7 @@ export const ExplorerPane = ({
   moveNum = 1,
 }: ExplorerPaneProps) => {
   const gameRef = useRef(createChessFromFen(position));
+  const graphRef = useRef(new ChessGraph());
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
 
   const [currentFen, setCurrentFen] = useState<FenString>(position);
@@ -76,6 +79,13 @@ export const ExplorerPane = ({
     // Update the current position
     const newFen = game.fen();
     setCurrentFen(newFen);
+
+    // Add the move to the graph
+    graphRef.current.addMove(currentFen, {
+      move,
+      seq: 1,
+      toFen: newFen,
+    });
 
     // Add the move and its FEN to the moves array with moveNum string
     setMoves((prevMoves) => {
@@ -122,11 +132,22 @@ export const ExplorerPane = ({
     <div className="explorer-pane" style={{ display: 'flex', flexDirection: 'row' }}>
       <div className="board-container" style={{ width: '600px' }}>
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
-        <Moves moves={moves} onMoveClick={handleSetPosition} />
       </div>
-      <div className="tree-table" style={{ width: '512px', height: '560px', overflowY: 'auto' }}>
+      <div
+        className="tree-table"
+        style={{ width: '480px', height: '560px', display: 'flex', flexDirection: 'column' }}
+      >
+        <div style={{ flex: 1, borderBottom: '1px solid #999', overflowY: 'auto' }}>
+          <MovePane rootFen={position} graph={graphRef.current} moveNum={moveNum} />
+        </div>
         {currentPos !== undefined && (
-          <PositionTable treePos={currentPos} onSelectMove={handleMove} moveNum={currentMoveNum} />
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            <PositionTable
+              treePos={currentPos}
+              onSelectMove={handleMove}
+              moveNum={currentMoveNum}
+            />
+          </div>
         )}
       </div>
     </div>
