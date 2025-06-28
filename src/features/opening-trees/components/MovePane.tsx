@@ -17,7 +17,11 @@ export const MovePane = ({ rootFen, graph, moveNum }: MovePaneProps) => {
 
     const firstMove = position.moves[0];
     const isWhiteMove = fen.includes(' w ');
-    const moveNumStr = isWhiteMove ? `${currentMoveNum}.` : '';
+    const moveNumStr = isWhiteMove
+      ? `${currentMoveNum}.`
+      : fen === rootFen
+        ? `${currentMoveNum}…`
+        : '';
 
     return (
       <>
