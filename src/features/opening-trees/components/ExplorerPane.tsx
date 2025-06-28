@@ -11,7 +11,6 @@ import type { Key } from 'chessground/types';
 import type { FenString } from '../../../core/types';
 import { useTree } from '../hooks/useTree';
 import { PositionTable } from './PositionTable';
-import { Moves } from './Moves';
 import { START_POSITION_FEN } from '../../../core/constants';
 import type { TreeMove } from '../types';
 import { MovePane } from './MovePane';
