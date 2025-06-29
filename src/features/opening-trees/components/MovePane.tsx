@@ -27,7 +27,7 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
     return (
       <>
         <span className="move">
-          {moveNumStr}
+          {moveNumStr}{' '}
           <span
             style={{ marginRight: '8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
             onClick={() => onMoveClick(firstMove.toFen)}
