@@ -17,7 +17,10 @@ export class ChessGraph {
 
   addMove(fromFen: FenString, moveEdge: MoveEdge) {
     if (fromFen in this.nodes) {
-      this.nodes[fromFen].moves.push(moveEdge);
+      const existingMove = this.nodes[fromFen].moves.find((move) => move.toFen === moveEdge.toFen);
+      if (!existingMove) {
+        this.nodes[fromFen].moves.push(moveEdge);
+      }
     } else {
       this.nodes[fromFen] = { moves: [moveEdge] };
     }
