@@ -10,7 +10,11 @@ type MovePaneProps = {
 };
 
 export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps) => {
-  const renderMoves = (fen: FenString, currentMoveNum: number): JSX.Element | null => {
+  const renderMoves = (
+    fen: FenString,
+    currentMoveNum: number,
+    isFirstMove = false
+  ): JSX.Element | null => {
     const position = graph.nodes[fen];
     if (!position || position.moves.length === 0) {
       return null;
@@ -23,21 +27,21 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
       ? `${currentMoveNum}. `
       : fen === rootFen
         ? `${currentMoveNum}… `
-        : '';
+        : ' ';
 
     return (
       <>
-        <span className="move">
+        <span className="move" style={{ marginLeft: isFirstMove ? '0px' : '8px' }}>
           {moveNumStr}
           <span
-            style={{ marginRight: '8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            style={{ marginLeft: '0px', cursor: 'pointer', whiteSpace: 'nowrap' }}
             onClick={() => onMoveClick(firstMove.toFen)}
           >
             {firstMove.move}
           </span>
         </span>
         {variations.length > 0 && (
-          <span className="variations">
+          <span className="variations" style={{ marginLeft: '8px' }}>
             (
             {variations.map((variation, index) => (
               <span className="variation" key={variation.move}>
@@ -55,10 +59,10 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
             ){' '}
           </span>
         )}
-        {renderMoves(firstMove.toFen, isWhiteMove ? currentMoveNum : currentMoveNum + 1)}
+        {renderMoves(firstMove.toFen, isWhiteMove ? currentMoveNum : currentMoveNum + 1, false)}
       </>
     );
   };
 
-  return <div className="move-pane">{renderMoves(rootFen, moveNum)}</div>;
+  return <div className="move-pane">{renderMoves(rootFen, moveNum, true)}</div>;
 };
