@@ -16,8 +16,6 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
       return null;
     }
 
-    console.log('MovePane', fen, currentMoveNum, JSON.stringify(position.moves));
-
     const firstMove = position.moves[0];
     const variations = position.moves.slice(1);
     const isWhiteMove = fen.includes(' w ');
@@ -42,10 +40,9 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
           <span className="variations">
             (
             {variations.map((variation, index) => (
-              <>
+              <span className="variation" key={variation.move}>
                 {isWhiteMove ? `${currentMoveNum}. ` : `${currentMoveNum}… `}
                 <span
-                  key={variation.move}
                   style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
                   onClick={() => onMoveClick(variation.toFen)}
                 >
@@ -53,7 +50,7 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
                 </span>{' '}
                 {renderMoves(variation.toFen, isWhiteMove ? currentMoveNum : currentMoveNum + 1)}
                 {index < variations.length - 1 && '; '}
-              </>
+              </span>
             ))}
             ){' '}
           </span>
