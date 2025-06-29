@@ -16,18 +16,21 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
       return null;
     }
 
+    console.log('MovePane', fen, currentMoveNum, JSON.stringify(position.moves));
+
     const firstMove = position.moves[0];
+    const variations = position.moves.slice(1);
     const isWhiteMove = fen.includes(' w ');
     const moveNumStr = isWhiteMove
-      ? `${currentMoveNum}.`
+      ? `${currentMoveNum}. `
       : fen === rootFen
-        ? `${currentMoveNum}…`
+        ? `${currentMoveNum}… `
         : '';
 
     return (
       <>
         <span className="move">
-          {moveNumStr}{' '}
+          {moveNumStr}
           <span
             style={{ marginRight: '8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
             onClick={() => onMoveClick(firstMove.toFen)}
@@ -35,6 +38,26 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
             {firstMove.move}
           </span>
         </span>
+        {variations.length > 0 && (
+          <span className="variations">
+            (
+            {variations.map((variation, index) => (
+              <>
+                {isWhiteMove ? `${currentMoveNum}. ` : `${currentMoveNum}… `}
+                <span
+                  key={variation.move}
+                  style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  onClick={() => onMoveClick(variation.toFen)}
+                >
+                  {variation.move}
+                </span>{' '}
+                {renderMoves(variation.toFen, isWhiteMove ? currentMoveNum : currentMoveNum + 1)}
+                {index < variations.length - 1 && '; '}
+              </>
+            ))}
+            ){' '}
+          </span>
+        )}
         {renderMoves(firstMove.toFen, isWhiteMove ? currentMoveNum : currentMoveNum + 1)}
       </>
     );
