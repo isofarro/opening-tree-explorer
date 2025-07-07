@@ -59,16 +59,6 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
     [treeName, updatePosition]
   );
 
-  // Clear cache when treeName changes
-  const prevTreeName = useRef<string>(treeName);
-  useEffect(() => {
-    if (prevTreeName.current !== treeName) {
-      positionCache.current.clear();
-      fetchingRef.current.clear();
-      prevTreeName.current = treeName;
-    }
-  }, [treeName]);
-
   useEffect(() => {
     console.log('[USEEFFECT] fetchPosition');
     fetchPosition(currentFen);
