@@ -10,21 +10,33 @@ export const PositionTable = ({ treePos, onSelectMove, moveNum = 1 }: PositionTa
   const isWhiteToMove = treePos.fen.split(' ')[1] === 'w';
 
   return (
-    <table cellPadding={2} style={{ fontSize: '90%' }}>
+    <table className="text-sm p-2 w-full">
       <thead>
         <tr>
-          <th scope="column">Move</th>
-          <th scope="column">Games</th>
-          <th scope="column">W/D/L</th>
-          <th scope="column">Rating</th>
-          <th scope="column">Perf</th>
-          <th scope="column">Last Played</th>
+          <th scope="column" className="px-0.5">
+            Move
+          </th>
+          <th scope="column" className="px-0.5">
+            Games
+          </th>
+          <th scope="column" className="px-0.5">
+            W/D/L
+          </th>
+          <th scope="column" className="px-0.5">
+            Rating
+          </th>
+          <th scope="column" className="px-0.5">
+            Perf
+          </th>
+          <th scope="column" className="px-0.5">
+            Last Played
+          </th>
         </tr>
       </thead>
       <tbody>
         {treePos.moves.map((move) => (
           <tr key={move.move}>
-            <td align="left">
+            <td align="left" className="px-0.5">
               <a
                 href="#"
                 onClick={(e) => {
@@ -35,18 +47,22 @@ export const PositionTable = ({ treePos, onSelectMove, moveNum = 1 }: PositionTa
                 {`${isWhiteToMove ? `${moveNum}.` : `${moveNum}…`} ${move.move}`}
               </a>
             </td>
-            <td align="right">{move.totalGames}</td>
-            <td align="right">
+            <td align="right" className="px-0.5">
+              {move.totalGames}
+            </td>
+            <td align="right" className="px-0.5">
               {isWhiteToMove
                 ? `${move.whiteWins} / ${move.draws} / ${move.blackWins}`
                 : `${move.blackWins} / ${move.draws} / ${move.whiteWins}`}
             </td>
-            <td align="center">{move.rating}</td>
-            <td align="right">
+            <td align="center" className="px-0.5">
+              {move.rating}
+            </td>
+            <td align="right" className="px-0.5">
               {move.performance > move.rating && '+'}
               {move.performance - move.rating}
             </td>
-            <td>{move.lastPlayedDate}</td>
+            <td className="px-0.5">{move.lastPlayedDate}</td>
           </tr>
         ))}
       </tbody>

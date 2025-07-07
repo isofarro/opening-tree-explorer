@@ -10,38 +10,23 @@ export const TreeSelector = ({ selectedTree, onTreeChange }: TreeSelectorProps) 
   const { treeNames, loading, error } = useOpeningTree();
 
   if (loading) {
-    return <div style={{ padding: '8px', fontSize: '14px', color: '#666' }}>Loading trees...</div>;
+    return <div className="p-2 text-sm text-gray-500">Loading trees...</div>;
   }
 
   if (error) {
-    return (
-      <div style={{ padding: '8px', fontSize: '14px', color: '#d32f2f' }}>
-        Error loading trees: {error}
-      </div>
-    );
+    return <div className="p-2 text-sm text-red-600">Error loading trees: {error}</div>;
   }
 
   return (
-    <div style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-      <label
-        htmlFor="tree-selector"
-        style={{ fontSize: '14px', fontWeight: 'bold', marginRight: '8px' }}
-      >
+    <div className="p-2 border-b border-gray-300">
+      <label htmlFor="tree-selector" className="text-sm font-bold mr-2">
         Opening Tree:
       </label>
       <select
         id="tree-selector"
         value={selectedTree}
         onChange={(e) => onTreeChange(e.target.value)}
-        style={{
-          padding: '4px 8px',
-          fontSize: '14px',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          minWidth: '200px',
-          color: '#333',
-        }}
+        className="text-sm px-2 py-1 border border-gray-300 rounded bg-white text-gray-800"
       >
         {treeNames.map((treeName) => (
           <option key={treeName} value={treeName}>

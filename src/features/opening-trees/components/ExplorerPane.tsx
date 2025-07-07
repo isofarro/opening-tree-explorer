@@ -135,15 +135,12 @@ export const ExplorerPane = ({
   const currentMoveNum = moveNum + movesMade + blackFirstMoveOffset;
 
   return (
-    <div className="explorer-pane" style={{ display: 'flex', flexDirection: 'row' }}>
-      <div className="board-container" style={{ width: '600px' }}>
+    <div className="explorer-pane flex flex-row">
+      <div className="board-container w-[600px]">
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
       </div>
-      <div
-        className="tree-table"
-        style={{ width: '480px', height: '560px', display: 'flex', flexDirection: 'column' }}
-      >
-        <div style={{ flex: 2, borderBottom: '1px solid #999', overflowY: 'auto' }}>
+      <div className="tree-table w-[480px] h-[560px] flex flex-col">
+        <div className="flex-[2] border-b border-gray-600 overflow-y-auto">
           <MovePane
             rootFen={position}
             graph={graphRef.current}
@@ -153,7 +150,7 @@ export const ExplorerPane = ({
         </div>
         <TreeSelector selectedTree={selectedTree} onTreeChange={handleTreeChange} />
         {currentPos !== undefined && (
-          <div style={{ flex: 3, overflowY: 'auto' }}>
+          <div className="flex-[3] overflow-y-auto">
             <PositionTable
               treePos={currentPos}
               onSelectMove={handleMove}

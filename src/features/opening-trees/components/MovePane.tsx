@@ -31,23 +31,23 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
 
     return (
       <>
-        <span className="move" style={{ marginLeft: isFirstMove ? '0px' : '8px' }}>
+        <span className={`move ${isFirstMove ? 'ml-0' : 'ml-2'}`}>
           {moveNumStr}
           <span
-            style={{ marginLeft: '0px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            className="ml-0 cursor-pointer whitespace-nowrap"
             onClick={() => onMoveClick(firstMove.toFen)}
           >
             {firstMove.move}
           </span>
         </span>
         {variations.length > 0 && (
-          <span className="variations" style={{ marginLeft: '8px' }}>
+          <span className="variations ml-2">
             (
             {variations.map((variation, index) => (
               <span className="variation" key={variation.move}>
                 {isWhiteMove ? `${currentMoveNum}. ` : `${currentMoveNum}… `}
                 <span
-                  style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  className="cursor-pointer whitespace-nowrap"
                   onClick={() => onMoveClick(variation.toFen)}
                 >
                   {variation.move}
