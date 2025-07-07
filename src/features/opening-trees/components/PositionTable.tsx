@@ -1,4 +1,5 @@
 import type { OpeningTreePosition } from '../../../api/types';
+import { WDLBarGraph } from './WDLBarGraph';
 
 type PositionTableProps = {
   treePos: OpeningTreePosition;
@@ -50,10 +51,12 @@ export const PositionTable = ({ treePos, onSelectMove, moveNum = 1 }: PositionTa
             <td align="right" className="px-0.5">
               {move.totalGames}
             </td>
-            <td align="right" className="px-0.5">
-              {isWhiteToMove
-                ? `${move.whiteWins} / ${move.draws} / ${move.blackWins}`
-                : `${move.blackWins} / ${move.draws} / ${move.whiteWins}`}
+            <td align="center" className="px-0.5">
+              <WDLBarGraph
+                wins={isWhiteToMove ? move.whiteWins : move.blackWins}
+                draws={move.draws}
+                losses={isWhiteToMove ? move.blackWins : move.whiteWins}
+              />
             </td>
             <td align="center" className="px-0.5">
               {move.rating}
