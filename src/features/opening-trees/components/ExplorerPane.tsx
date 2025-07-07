@@ -51,7 +51,6 @@ export const ExplorerPane = ({
   const gameRef = useRef(createChessFromFen(position));
   const graphRef = useRef(new ChessGraph());
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
-  const hasInitialized = useRef(false);
 
   const [currentFen, setCurrentFen] = useState<FenString>(position);
   const [moves, setMoves] = useState<TreeMove[]>([]);
@@ -71,8 +70,8 @@ export const ExplorerPane = ({
   };
 
   const handleTreeChange = (newTree: string) => {
-    setSelectedTree(newTree);
     // Keep current position and just update the tree data
+    setSelectedTree(newTree);
   };
 
   const handleMove = (move: string) => {
@@ -144,7 +143,7 @@ export const ExplorerPane = ({
         className="tree-table"
         style={{ width: '480px', height: '560px', display: 'flex', flexDirection: 'column' }}
       >
-        <div style={{ flex: 1, borderBottom: '1px solid #999', overflowY: 'auto' }}>
+        <div style={{ flex: 2, borderBottom: '1px solid #999', overflowY: 'auto' }}>
           <MovePane
             rootFen={position}
             graph={graphRef.current}
@@ -154,7 +153,7 @@ export const ExplorerPane = ({
         </div>
         <TreeSelector selectedTree={selectedTree} onTreeChange={handleTreeChange} />
         {currentPos !== undefined && (
-          <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ flex: 3, overflowY: 'auto' }}>
             <PositionTable
               treePos={currentPos}
               onSelectMove={handleMove}
