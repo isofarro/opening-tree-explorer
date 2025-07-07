@@ -13,7 +13,7 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
   const [currentFen, setCurrentFen] = useState<FenString>(startFen);
   const [currentPos, setCurrentPos] = useState<OpeningTreePosition | undefined>(undefined);
 
-  const positionCache = useRef<Map<FenString, OpeningTreePosition>>(new Map());
+  const positionCache = useRef<Map<string, OpeningTreePosition>>(new Map());
   const fetchingRef = useRef<Set<string>>(new Set());
 
   const updatePosition = useCallback(
@@ -27,37 +27,47 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
 
   const fetchPosition = useCallback(
     async (newFen: FenString) => {
+      // Create cache key using both treeName and fen
+      const cacheKey = `${treeName}-${newFen}`;
+
       // Check if position is in cache
-      const cachedPosition = positionCache.current.get(newFen);
+      const cachedPosition = positionCache.current.get(cacheKey);
       if (cachedPosition) {
         updatePosition(cachedPosition, newFen, 'Cache hit');
         return;
       }
 
-      // Create a unique key for this fetch operation
-      const fetchKey = `${treeName}-${newFen}`;
-
       // Check if we're already fetching this position
-      if (fetchingRef.current.has(fetchKey)) {
-        console.log('Already fetching:', fetchKey);
+      if (fetchingRef.current.has(cacheKey)) {
+        console.log('Already fetching:', cacheKey);
         return;
       }
 
       // Mark as fetching
-      fetchingRef.current.add(fetchKey);
+      fetchingRef.current.add(cacheKey);
 
       try {
         // Fetch from server if not in cache
         const treePosition = await Api.openingTrees.getPositionByFen(treeName, newFen);
-        positionCache.current.set(newFen, treePosition);
+        positionCache.current.set(cacheKey, treePosition);
         updatePosition(treePosition, newFen, 'getPositionByFen');
       } finally {
         // Remove from fetching set when done
-        fetchingRef.current.delete(fetchKey);
+        fetchingRef.current.delete(cacheKey);
       }
     },
     [treeName, updatePosition]
   );
+
+  // Clear cache when treeName changes
+  const prevTreeName = useRef<string>(treeName);
+  useEffect(() => {
+    if (prevTreeName.current !== treeName) {
+      positionCache.current.clear();
+      fetchingRef.current.clear();
+      prevTreeName.current = treeName;
+    }
+  }, [treeName]);
 
   useEffect(() => {
     console.log('[USEEFFECT] fetchPosition');
