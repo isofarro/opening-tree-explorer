@@ -14,6 +14,7 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
   const [currentPos, setCurrentPos] = useState<OpeningTreePosition | undefined>(undefined);
 
   const positionCache = useRef<Map<FenString, OpeningTreePosition>>(new Map());
+  const fetchingRef = useRef<Set<string>>(new Set());
 
   const updatePosition = useCallback(
     (position: OpeningTreePosition, fen: FenString, source: string) => {
@@ -33,10 +34,27 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
         return;
       }
 
-      // Fetch from server if not in cache
-      const treePosition = await Api.openingTrees.getPositionByFen(treeName, newFen);
-      positionCache.current.set(newFen, treePosition);
-      updatePosition(treePosition, newFen, 'getPositionByFen');
+      // Create a unique key for this fetch operation
+      const fetchKey = `${treeName}-${newFen}`;
+
+      // Check if we're already fetching this position
+      if (fetchingRef.current.has(fetchKey)) {
+        console.log('Already fetching:', fetchKey);
+        return;
+      }
+
+      // Mark as fetching
+      fetchingRef.current.add(fetchKey);
+
+      try {
+        // Fetch from server if not in cache
+        const treePosition = await Api.openingTrees.getPositionByFen(treeName, newFen);
+        positionCache.current.set(newFen, treePosition);
+        updatePosition(treePosition, newFen, 'getPositionByFen');
+      } finally {
+        // Remove from fetching set when done
+        fetchingRef.current.delete(fetchKey);
+      }
     },
     [treeName, updatePosition]
   );
