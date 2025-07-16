@@ -48,10 +48,13 @@ export const OpeningTreeProvider = ({ children }: OpeningTreeProviderProps) => {
           if (typeof tree === 'string') {
             return { name: tree, path: tree };
           }
-          return { name: tree.name || tree.id || String(tree), path: tree.path || tree.name || tree.id || String(tree) };
+          return {
+            name: tree.name || tree.id || String(tree),
+            path: tree.path || tree.name || tree.id || String(tree),
+          };
         });
-        
-        const names = processedTrees.map(tree => tree.name);
+
+        const names = processedTrees.map((tree) => tree.name);
         console.log('Trees:', processedTrees);
         console.log('Tree names:', names);
 

@@ -57,9 +57,9 @@ export const ExplorerPane = ({
   const [currentFen, setCurrentFen] = useState<FenString>(position);
   const [moves, setMoves] = useState<TreeMove[]>([]);
   const [selectedTree, setSelectedTree] = useState<string>(tree);
-  
+
   // Find the selected tree object
-  const selectedTreeObj = trees.find(t => t.name === selectedTree) || undefined;
+  const selectedTreeObj = trees.find((t) => t.name === selectedTree) || undefined;
   const { makeMove, currentPos, setPosition } = useTree(selectedTreeObj, position);
 
   useEffect(() => {

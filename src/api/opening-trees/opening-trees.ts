@@ -8,10 +8,13 @@ const getOpeningTrees = async () => {
   return await ApiClient.get<OpeningTree>(MicroServices.OPENING_TREES, '/');
 };
 
-const getPositionByFen = async (tree: OpeningTree, fen: FenString): Promise<OpeningTreePosition> => {
+const getPositionByFen = async (
+  tree: OpeningTree,
+  fen: FenString
+): Promise<OpeningTreePosition> => {
   const encodedFen = encodeURIComponent(fen);
   const response = await ApiClient.get<OpeningTreePositionResponse>(
-    tree.path.replace(/\/$/, ""),
+    tree.path.replace(/\/$/, ''),
     `/${encodedFen}`
   );
   return transformToOpeningTreePosition(response);
