@@ -56,7 +56,6 @@ export const OpeningTreeProvider = ({ children }: OpeningTreeProviderProps) => {
 
         const names = processedTrees.map((tree) => tree.name);
         console.log('Trees:', processedTrees);
-        console.log('Tree names:', names);
 
         setTrees(processedTrees);
         setTreeNames(names);
