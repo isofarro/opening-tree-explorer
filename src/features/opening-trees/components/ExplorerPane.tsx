@@ -15,6 +15,7 @@ import { START_POSITION_FEN } from '../../../core/constants';
 import type { TreeMove } from '../types';
 import { MovePane } from './MovePane';
 import { TreeSelector } from './TreeSelector';
+import { useOpeningTree } from '../providers/OpeningTreeProvider';
 
 function toDests(chess: Chess): Map<Key, Key[]> {
   const dests = new Map();
@@ -51,11 +52,15 @@ export const ExplorerPane = ({
   const gameRef = useRef(createChessFromFen(position));
   const graphRef = useRef(new ChessGraph());
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
+  const { trees } = useOpeningTree();
 
   const [currentFen, setCurrentFen] = useState<FenString>(position);
   const [moves, setMoves] = useState<TreeMove[]>([]);
   const [selectedTree, setSelectedTree] = useState<string>(tree);
-  const { makeMove, currentPos, setPosition } = useTree(selectedTree, position);
+  
+  // Find the selected tree object
+  const selectedTreeObj = trees.find(t => t.name === selectedTree) || undefined;
+  const { makeMove, currentPos, setPosition } = useTree(selectedTreeObj, position);
 
   useEffect(() => {
     if (apiRef.current) {

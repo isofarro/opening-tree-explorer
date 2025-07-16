@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Api } from '../../../api';
+import type { OpeningTree } from '../../../api/types';
 
 type OpeningTreeContextType = {
+  trees: OpeningTree[];
   treeNames: string[];
   loading: boolean;
   error: string | null;
@@ -23,6 +25,7 @@ type OpeningTreeProviderProps = {
 };
 
 export const OpeningTreeProvider = ({ children }: OpeningTreeProviderProps) => {
+  const [trees, setTrees] = useState<OpeningTree[]>([]);
   const [treeNames, setTreeNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,16 +40,22 @@ export const OpeningTreeProvider = ({ children }: OpeningTreeProviderProps) => {
         setLoading(true);
         setError(null);
 
-        const trees = await Api.openingTrees.getOpeningTrees();
+        const treesResponse = await Api.openingTrees.getOpeningTrees();
 
-        // Extract tree names from the array
-        const names = Array.isArray(trees)
-          ? trees.map((tree: any) =>
-              typeof tree === 'string' ? tree : tree.name || tree.id || String(tree)
-            )
-          : [];
+        // Handle both array of trees and array of strings
+        const treesArray = Array.isArray(treesResponse) ? treesResponse : [];
+        const processedTrees: OpeningTree[] = treesArray.map((tree: any) => {
+          if (typeof tree === 'string') {
+            return { name: tree, path: tree };
+          }
+          return { name: tree.name || tree.id || String(tree), path: tree.path || tree.name || tree.id || String(tree) };
+        });
+        
+        const names = processedTrees.map(tree => tree.name);
+        console.log('Trees:', processedTrees);
         console.log('Tree names:', names);
 
+        setTrees(processedTrees);
         setTreeNames(names);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error occurred');
@@ -61,6 +70,7 @@ export const OpeningTreeProvider = ({ children }: OpeningTreeProviderProps) => {
   }, []);
 
   const value = {
+    trees,
     treeNames,
     loading,
     error,

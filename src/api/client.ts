@@ -1,10 +1,11 @@
 import type { MicroService } from './service-types';
 import { MicroServiceConfig } from './services';
 
-const get = async <T>(service: MicroService, path: string): Promise<T> => {
+const get = async <T>(service: MicroService | string, path: string): Promise<T> => {
   try {
     const config = MicroServiceConfig[service];
-    const url = `${config.host}${path}`;
+    const host = config !== undefined ? config.host : service;
+    const url = `${host}${path}`;
     const response = await fetch(url);
 
     if (!response.ok) {

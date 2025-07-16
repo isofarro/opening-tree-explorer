@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FenString } from '../../../core/types';
-import type { OpeningTreePosition } from '../../../api/types';
+import type { OpeningTree, OpeningTreePosition } from '../../../api/types';
 import { Api } from '../../../api';
 
 type UseTreeProps = {
@@ -9,7 +9,7 @@ type UseTreeProps = {
   setPosition: (fen: FenString) => boolean;
 };
 
-export const useTree = (treeName: string, startFen: FenString): UseTreeProps => {
+export const useTree = (tree: OpeningTree | undefined, startFen: FenString): UseTreeProps => {
   const [currentFen, setCurrentFen] = useState<FenString>(startFen);
   const [currentPos, setCurrentPos] = useState<OpeningTreePosition | undefined>(undefined);
 
@@ -27,8 +27,12 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
 
   const fetchPosition = useCallback(
     async (newFen: FenString) => {
-      // Create cache key using both treeName and fen
-      const cacheKey = `${treeName}-${newFen}`;
+      if (tree === undefined) {
+        return;
+      }
+
+      // Create cache key using both tree name and fen
+      const cacheKey = `${tree.name}-${newFen}`;
 
       // Check if position is in cache
       const cachedPosition = positionCache.current.get(cacheKey);
@@ -48,7 +52,7 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
 
       try {
         // Fetch from server if not in cache
-        const treePosition = await Api.openingTrees.getPositionByFen(treeName, newFen);
+        const treePosition = await Api.openingTrees.getPositionByFen(tree, newFen);
         positionCache.current.set(cacheKey, treePosition);
         updatePosition(treePosition, newFen, 'getPositionByFen');
       } finally {
@@ -56,13 +60,16 @@ export const useTree = (treeName: string, startFen: FenString): UseTreeProps => 
         fetchingRef.current.delete(cacheKey);
       }
     },
-    [treeName, updatePosition]
+    [tree, updatePosition]
   );
 
   useEffect(() => {
-    console.log('[USEEFFECT] fetchPosition');
+    if (tree === undefined) {
+      return;
+    }
+    console.log('[USEEFFECT] fetchPosition', tree);
     fetchPosition(currentFen);
-  }, [currentFen, treeName]);
+  }, [currentFen, tree]);
 
   const makeMove = (move: string): boolean => {
     // Find the move in the current position info
