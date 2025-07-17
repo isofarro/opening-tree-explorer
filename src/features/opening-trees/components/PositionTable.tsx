@@ -53,9 +53,9 @@ export const PositionTable = ({ treePos, onSelectMove, moveNum = 1 }: PositionTa
             </td>
             <td align="center" className="px-0.5">
               <WDLBarGraph
-                wins={isWhiteToMove ? move.whiteWins : move.blackWins}
+                wins={move.whiteWins}
                 draws={move.draws}
-                losses={isWhiteToMove ? move.blackWins : move.whiteWins}
+                losses={move.blackWins}
               />
             </td>
             <td align="center" className="px-0.5">
