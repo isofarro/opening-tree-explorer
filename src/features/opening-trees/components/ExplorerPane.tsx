@@ -157,9 +157,11 @@ export const ExplorerPane = ({
         {currentPos !== undefined && (
           <div className="flex-[3] overflow-y-auto">
             <PositionTable
-              treePos={currentPos}
+              treePos={{
+                ...currentPos,
+                moveNumber: currentMoveNum,
+              }}
               onSelectMove={handleMove}
-              moveNum={currentMoveNum}
             />
           </div>
         )}

@@ -39,4 +39,5 @@ export type OpeningTreeMove = {
 export type OpeningTreePosition = {
   fen: FenString;
   moves: OpeningTreeMove[];
+  moveNumber?: number;
 };

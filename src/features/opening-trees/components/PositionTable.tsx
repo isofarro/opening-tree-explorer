@@ -7,8 +7,9 @@ type PositionTableProps = {
   moveNum?: number;
 };
 
-export const PositionTable = ({ treePos, onSelectMove, moveNum = 1 }: PositionTableProps) => {
+export const PositionTable = ({ treePos, onSelectMove }: PositionTableProps) => {
   const isWhiteToMove = treePos.fen.split(' ')[1] === 'w';
+  const moveNum = treePos.moveNumber || 1;
 
   return (
     <table className="text-sm p-2 w-full">
@@ -52,11 +53,7 @@ export const PositionTable = ({ treePos, onSelectMove, moveNum = 1 }: PositionTa
               {move.totalGames}
             </td>
             <td align="center" className="px-0.5">
-              <WDLBarGraph
-                wins={move.whiteWins}
-                draws={move.draws}
-                losses={move.blackWins}
-              />
+              <WDLBarGraph wins={move.whiteWins} draws={move.draws} losses={move.blackWins} />
             </td>
             <td align="center" className="px-0.5">
               {move.rating}
