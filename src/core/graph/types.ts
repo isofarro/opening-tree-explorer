@@ -1,10 +1,13 @@
 import type { FenString } from '../types';
 
-export type MoveEdge = {
+export type Move = {
   move: string;
+  toFen: string;
+};
+
+export type MoveEdge = Move & {
   seq: number; // For ordering of moves on a position
   // Add move properties here
-  toFen: FenString;
 };
 
 export type PositionNode = {
