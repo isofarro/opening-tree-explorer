@@ -15,6 +15,7 @@ import { MovePane } from './MovePane';
 import { TreeSelector } from './TreeSelector';
 import { useOpeningTree } from '../providers/OpeningTreeProvider';
 import { ChessMoveGraph } from '../../../core/graph/ChessMoveGraph';
+import type { Move } from '../../../core/graph/types';
 
 function toDests(chess: Chess): Map<Key, Key[]> {
   const dests = new Map();
@@ -115,15 +116,34 @@ export const ExplorerPane = ({
     },
   };
 
-  const isBlackFirstMove = position.split(' ')[1] === 'b';
+  const isBlackFirstMove = position.includes(' b ');
   const currentMoveNum = Math.floor(
     (2 + graphRef.current.getMovePath().length + (isBlackFirstMove ? 1 : 0)) / 2
   );
+
+  const getMoveNumStr = (i: number) => {
+    if (i === 0 && isBlackFirstMove) {
+      return '1…';
+    }
+
+    if ((isBlackFirstMove && i % 2 === 1) || (!isBlackFirstMove && i % 2 === 0)) {
+      return `${Math.floor((i + 2) / 2)}.`;
+    }
+
+    return '';
+  };
 
   return (
     <div className="explorer-pane flex flex-row">
       <div className="board-container w-[600px]">
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
+        <div>
+          {graphRef.current.getMovePath().map((move, i) => (
+            <span key={i}>
+              {getMoveNumStr(i)} {move.move}{' '}
+            </span>
+          ))}
+        </div>
       </div>
       <div className="tree-table w-[480px] h-[560px] flex flex-col">
         <div className="flex-[2] border-b border-gray-600 overflow-y-auto">
