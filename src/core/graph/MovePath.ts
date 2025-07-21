@@ -17,11 +17,10 @@ export class MovePath {
   }
 
   addMove(fromFen: FenString, move: Move) {
-    console.log('[PATH] addMove:', fromFen, move, this.path);
-
     // Find the move with a toFen that matches the fromFen
+
+    // The main usecase is it's the last move
     if (this.path.length === 0 || this.path[this.path.length - 1].toFen === fromFen) {
-      // The main usecase is it's the last move
       this.path.push(move);
       return;
     }

@@ -1,11 +1,11 @@
 import { START_POSITION_FEN } from '../constants';
 import type { FenString } from '../types';
 import { ChessGraph } from './ChessGraph';
-import type { IChessGraph } from './iChessGraph';
+import type { IChessMoveGraph } from './iChessGraph';
 import { MovePath } from './MovePath';
 import type { Move } from './types';
 
-export class ChessMoveGraph implements IChessGraph {
+export class ChessMoveGraph implements IChessMoveGraph {
   graph: ChessGraph; // The graph of positions and moves
   moves: MovePath; // The path through the graph
 
