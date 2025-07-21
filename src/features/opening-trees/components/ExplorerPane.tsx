@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { Chess } from 'chess.ts';
-import { ChessGraph } from '../../../core/graph/ChessGraph';
 import Chessground, {
   type Api as ChessgroundApi,
   type Config as ChessgroundConfig,
@@ -16,6 +15,7 @@ import type { TreeMove } from '../types';
 import { MovePane } from './MovePane';
 import { TreeSelector } from './TreeSelector';
 import { useOpeningTree } from '../providers/OpeningTreeProvider';
+import { ChessMoveGraph } from '../../../core/graph/ChessMoveGraph';
 
 function toDests(chess: Chess): Map<Key, Key[]> {
   const dests = new Map();
@@ -50,7 +50,7 @@ export const ExplorerPane = ({
   moveNum = 1,
 }: ExplorerPaneProps) => {
   const gameRef = useRef(createChessFromFen(position));
-  const graphRef = useRef(new ChessGraph());
+  const graphRef = useRef(new ChessMoveGraph());
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
   const { trees } = useOpeningTree();
 
@@ -92,24 +92,7 @@ export const ExplorerPane = ({
     setCurrentFen(newFen);
 
     // Add the move to the graph
-    graphRef.current.addMove(currentFen, {
-      move,
-      seq: 1,
-      toFen: newFen,
-    });
-
-    // Add the move and its FEN to the moves array with moveNum string
-    setMoves((prevMoves) => {
-      const isWhiteMove = newFen.includes(' b ');
-      const isFirstBlackMove = prevMoves.length === 0 && !isWhiteMove;
-      const prevMoveWasBlack =
-        prevMoves.length > 0 && !prevMoves[prevMoves.length - 1].fen.includes(' b ');
-      const currentMoveNum =
-        moveNum + Math.floor(prevMoves.length / 2) + (isWhiteMove && prevMoveWasBlack ? 1 : 0);
-      const moveNumStr =
-        isWhiteMove || isFirstBlackMove ? `${currentMoveNum}${isFirstBlackMove ? '…' : '.'}` : '';
-      return [...prevMoves, { move, fen: newFen, moveNumStr }];
-    });
+    graphRef.current.addMove(currentFen, { move, toFen: newFen });
 
     // Update the position tree.
     makeMove(move);

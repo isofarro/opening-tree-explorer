@@ -1,10 +1,10 @@
 import type { JSX } from 'react';
-import type { ChessGraph } from '../../../core/graph/ChessGraph';
 import type { FenString } from '../../../core/types';
+import type { IChessGraph } from '../../../core/graph/iChessGraph';
 
 type MovePaneProps = {
   rootFen: FenString;
-  graph: ChessGraph;
+  graph: IChessGraph;
   moveNum: number;
   onMoveClick: (fen: string) => void;
 };
@@ -15,7 +15,7 @@ export const MovePane = ({ rootFen, graph, moveNum, onMoveClick }: MovePaneProps
     currentMoveNum: number,
     isFirstMove = false
   ): JSX.Element | null => {
-    const position = graph.nodes[fen];
+    const position = graph.findPosition(fen);
     if (!position || position.moves.length === 0) {
       return null;
     }
