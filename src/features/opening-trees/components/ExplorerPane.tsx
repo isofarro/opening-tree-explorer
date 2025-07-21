@@ -15,7 +15,6 @@ import { MovePane } from './MovePane';
 import { TreeSelector } from './TreeSelector';
 import { useOpeningTree } from '../providers/OpeningTreeProvider';
 import { ChessMoveGraph } from '../../../core/graph/ChessMoveGraph';
-import type { Move } from '../../../core/graph/types';
 
 function toDests(chess: Chess): Map<Key, Key[]> {
   const dests = new Map();
@@ -117,17 +116,16 @@ export const ExplorerPane = ({
   };
 
   const isBlackFirstMove = position.includes(' b ');
-  const currentMoveNum = Math.floor(
-    (2 + graphRef.current.getMovePath().length + (isBlackFirstMove ? 1 : 0)) / 2
-  );
+  const pathLen = graphRef.current.getMovePath().length;
+  const currentMoveNum = Math.floor(moveNum + (pathLen + (isBlackFirstMove ? 1 : 0)) / 2);
 
   const getMoveNumStr = (i: number) => {
     if (i === 0 && isBlackFirstMove) {
-      return '1…';
+      return `${moveNum}…`;
     }
 
     if ((isBlackFirstMove && i % 2 === 1) || (!isBlackFirstMove && i % 2 === 0)) {
-      return `${Math.floor((i + 2) / 2)}.`;
+      return `${Math.floor(moveNum + (i + 1) / 2)}.`;
     }
 
     return '';
@@ -139,9 +137,11 @@ export const ExplorerPane = ({
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
         <div>
           {graphRef.current.getMovePath().map((move, i) => (
-            <span key={i}>
-              {getMoveNumStr(i)} {move.move}{' '}
-            </span>
+            <>
+              <span key={i} className="text-nowrap">
+                {getMoveNumStr(i)} {move.move}
+              </span>{' '}
+            </>
           ))}
         </div>
       </div>
