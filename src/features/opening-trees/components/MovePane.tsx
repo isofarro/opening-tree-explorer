@@ -1,10 +1,10 @@
 import type { JSX } from 'react';
 import type { FenString } from '../../../core/types';
-import type { IChessGraph } from '../../../core/graph/iChessGraph';
+import type { IChessMoveGraph } from '../../../core/graph/iChessGraph';
 
 type MovePaneProps = {
   rootFen: FenString;
-  graph: IChessGraph;
+  graph: IChessMoveGraph;
   moveNum: number;
   onMoveClick: (fen: string) => void;
 };
