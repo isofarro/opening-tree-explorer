@@ -11,7 +11,6 @@ import type { FenString } from '../../../core/types';
 import { useTree } from '../hooks/useTree';
 import { PositionTable } from './PositionTable';
 import { START_POSITION_FEN } from '../../../core/constants';
-import type { TreeMove } from '../types';
 import { MovePane } from './MovePane';
 import { TreeSelector } from './TreeSelector';
 import { useOpeningTree } from '../providers/OpeningTreeProvider';
@@ -55,7 +54,6 @@ export const ExplorerPane = ({
   const { trees } = useOpeningTree();
 
   const [currentFen, setCurrentFen] = useState<FenString>(position);
-  const [moves, setMoves] = useState<TreeMove[]>([]);
   const [selectedTree, setSelectedTree] = useState<string>(tree);
 
   // Find the selected tree object
@@ -82,6 +80,7 @@ export const ExplorerPane = ({
   const handleMove = (move: string) => {
     const game = gameRef.current;
     const madeMove = game.move(move);
+
     if (madeMove === null) {
       console.warn('Move not found in current position:', move);
       return;
@@ -117,10 +116,9 @@ export const ExplorerPane = ({
   };
 
   const isBlackFirstMove = position.split(' ')[1] === 'b';
-  const isWhiteMove = currentPos?.fen.split(' ')[1] === 'w';
-  const movesMade = Math.floor(moves.length / 2);
-  const blackFirstMoveOffset = isBlackFirstMove && isWhiteMove ? 1 : 0;
-  const currentMoveNum = moveNum + movesMade + blackFirstMoveOffset;
+  const currentMoveNum = Math.floor(
+    (2 + graphRef.current.getMovePath().length + (isBlackFirstMove ? 1 : 0)) / 2
+  );
 
   return (
     <div className="explorer-pane flex flex-row">
