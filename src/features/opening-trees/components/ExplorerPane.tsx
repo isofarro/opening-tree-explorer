@@ -137,11 +137,11 @@ export const ExplorerPane = ({
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
         <div>
           {graphRef.current.getMovePath().map((move, i) => (
-            <>
-              <span key={i} className="text-nowrap">
+            <span key={i}>
+              <span className="text-nowrap">
                 {getMoveNumStr(i)} {move.move}
               </span>{' '}
-            </>
+            </span>
           ))}
         </div>
       </div>
