@@ -9,9 +9,9 @@ import { DEFAULT_OPENING_TREE_NAME, START_POSITION_FEN } from '~/core/constants'
 import { ChessMoveGraph } from '~/core/graph/ChessMoveGraph';
 import { useTree } from '~/features/opening-trees/hooks/useTree';
 import { PositionTable } from '~/features/opening-trees/components/PositionTable';
-import { MovePane } from '~/features/moves/components/MovePane';
 import { TreeSelector } from '~/features/opening-trees/components/TreeSelector';
 import { useOpeningTree } from '~/features/opening-trees/providers/OpeningTreeProvider';
+import { MovePane } from '~/features/move-pane/components/MovePane';
 import { toDests } from '~/features/explorer/lib/moves';
 import { createChessFromFen } from '~/features/explorer/lib/fen';
 
