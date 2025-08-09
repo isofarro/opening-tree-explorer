@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { FenString } from '../../../core/types';
-import type { OpeningTree, OpeningTreePosition } from '../../../api/types';
-import { Api } from '../../../api';
+import type { FenString } from '~core/types';
+import type { OpeningTree, OpeningTreePosition } from '~api/types';
+import { Api } from '~api';
 
 type UseTreeProps = {
   currentPos: OpeningTreePosition | undefined;

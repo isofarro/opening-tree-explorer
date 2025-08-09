@@ -1,4 +1,4 @@
-import type { FenString, SanMove } from '../../core/types';
+import type { FenString, SanMove } from '~core/types';
 
 export type OpeningTree = {
   name: string;

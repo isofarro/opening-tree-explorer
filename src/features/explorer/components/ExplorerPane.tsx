@@ -1,20 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-
 import { Chess } from 'chess.ts';
 import Chessground, {
   type Api as ChessgroundApi,
   type Config as ChessgroundConfig,
-} from '../../../third-party/react-chessground/Chessground';
+} from '~third-party/react-chessground/Chessground';
 import type { Key } from 'chessground/types';
-
-import type { FenString } from '../../../core/types';
-import { useTree } from '../hooks/useTree';
-import { PositionTable } from './PositionTable';
-import { START_POSITION_FEN } from '../../../core/constants';
-import { MovePane } from './MovePane';
-import { TreeSelector } from './TreeSelector';
-import { useOpeningTree } from '../providers/OpeningTreeProvider';
-import { ChessMoveGraph } from '../../../core/graph/ChessMoveGraph';
+import type { FenString } from '~core/types';
+import { START_POSITION_FEN } from '~core/constants';
+import { ChessMoveGraph } from '~core/graph/ChessMoveGraph';
+import { useTree } from '~features/opening-trees/hooks/useTree';
+import { PositionTable } from '~features/opening-trees/components/PositionTable';
+import { MovePane } from '~features/moves/components/MovePane';
+import { TreeSelector } from '~features/opening-trees/components/TreeSelector';
+import { useOpeningTree } from '~features/opening-trees/providers/OpeningTreeProvider';
 
 function toDests(chess: Chess): Map<Key, Key[]> {
   const dests = new Map();

@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import type { FenString } from '../../../core/types';
-import type { IChessMoveGraph } from '../../../core/graph/iChessGraph';
+import type { FenString } from '~core/types';
+import type { IChessMoveGraph } from '~core/graph/iChessGraph';
 
 type MovePaneProps = {
   rootFen: FenString;

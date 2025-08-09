@@ -1,4 +1,3 @@
-import React from 'react';
 import { useOpeningTree } from '../providers/OpeningTreeProvider';
 
 type TreeSelectorProps = {

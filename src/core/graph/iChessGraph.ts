@@ -1,4 +1,4 @@
-import type { FenString } from '../types';
+import type { FenString } from '~core/types';
 import type { Move, PositionNode } from './types';
 
 export interface IChessGraph {

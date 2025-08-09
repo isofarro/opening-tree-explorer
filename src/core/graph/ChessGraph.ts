@@ -1,4 +1,4 @@
-import type { FenString } from '../types';
+import type { FenString } from '~core/types';
 import type { IChessGraph } from './iChessGraph';
 import type { Move, PositionNodeMap } from './types';
 
