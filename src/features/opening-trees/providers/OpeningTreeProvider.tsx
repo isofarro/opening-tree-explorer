@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Api } from '~api';
-import type { OpeningTree } from '~api/types';
+import { Api } from '~/api';
+import type { OpeningTree } from '~/api/types';
 
 type OpeningTreeContextType = {
   trees: OpeningTree[];

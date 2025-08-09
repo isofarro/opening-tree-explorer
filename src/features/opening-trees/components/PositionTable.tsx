@@ -1,4 +1,4 @@
-import type { OpeningTreePosition } from '~api/types';
+import type { OpeningTreePosition } from '~/api/types';
 import { WDLBarGraph } from './WDLBarGraph';
 
 type PositionTableProps = {

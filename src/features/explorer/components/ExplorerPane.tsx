@@ -1,33 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
-import { Chess } from 'chess.ts';
 import Chessground, {
   type Api as ChessgroundApi,
   type Config as ChessgroundConfig,
-} from '~third-party/react-chessground/Chessground';
+} from '~/third-party/react-chessground/Chessground';
 import type { Key } from 'chessground/types';
-import type { FenString } from '~core/types';
-import { START_POSITION_FEN } from '~core/constants';
-import { ChessMoveGraph } from '~core/graph/ChessMoveGraph';
-import { useTree } from '~features/opening-trees/hooks/useTree';
-import { PositionTable } from '~features/opening-trees/components/PositionTable';
-import { MovePane } from '~features/moves/components/MovePane';
-import { TreeSelector } from '~features/opening-trees/components/TreeSelector';
-import { useOpeningTree } from '~features/opening-trees/providers/OpeningTreeProvider';
-
-function toDests(chess: Chess): Map<Key, Key[]> {
-  const dests = new Map();
-  chess.moves({ verbose: true }).forEach((move) => {
-    const from = move.from;
-    const to = move.to;
-    const moves = dests.get(from);
-    if (moves) {
-      moves.push(to);
-    } else {
-      dests.set(from, [to]);
-    }
-  });
-  return dests;
-}
+import type { FenString } from '~/core/types';
+import { DEFAULT_OPENING_TREE_NAME, START_POSITION_FEN } from '~/core/constants';
+import { ChessMoveGraph } from '~/core/graph/ChessMoveGraph';
+import { useTree } from '~/features/opening-trees/hooks/useTree';
+import { PositionTable } from '~/features/opening-trees/components/PositionTable';
+import { MovePane } from '~/features/moves/components/MovePane';
+import { TreeSelector } from '~/features/opening-trees/components/TreeSelector';
+import { useOpeningTree } from '~/features/opening-trees/providers/OpeningTreeProvider';
+import { toDests } from '~/features/explorer/lib/moves';
+import { createChessFromFen } from '~/features/explorer/lib/fen';
 
 type ExplorerPaneProps = {
   tree: string;
@@ -35,14 +21,8 @@ type ExplorerPaneProps = {
   moveNum?: number;
 };
 
-const createChessFromFen = (fen: FenString): Chess => {
-  // If FEN already has move counters, use it as is, otherwise append them
-  const hasCounters = fen.split(' ').length > 4;
-  return new Chess(hasCounters ? fen : fen + ' 0 1');
-};
-
 export const ExplorerPane = ({
-  tree = 'twic-2025',
+  tree = DEFAULT_OPENING_TREE_NAME,
   position = START_POSITION_FEN,
   moveNum = 1,
 }: ExplorerPaneProps) => {

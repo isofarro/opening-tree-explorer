@@ -1,6 +1,6 @@
-import type { FenString } from '~core/types';
-import { MicroServices } from '~api/services';
-import { ApiClient } from '~api/client';
+import type { FenString } from '~/core/types';
+import { MicroServices } from '~/api/services';
+import { ApiClient } from '~/api/client';
 import type { OpeningTree, OpeningTreePosition, OpeningTreePositionResponse } from './types';
 import { transformToOpeningTreePosition } from './transformers';
 

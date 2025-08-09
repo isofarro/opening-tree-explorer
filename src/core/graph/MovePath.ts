@@ -1,5 +1,5 @@
-import { START_POSITION_FEN } from '~core/constants';
-import type { FenString } from '~core/types';
+import { START_POSITION_FEN } from '~/core/constants';
+import type { FenString } from '~/core/types';
 import type { Move } from './types';
 
 export class MovePath {

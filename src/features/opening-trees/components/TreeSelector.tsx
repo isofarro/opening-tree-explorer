@@ -1,4 +1,4 @@
-import { useOpeningTree } from '../providers/OpeningTreeProvider';
+import { useOpeningTree } from '~/features/opening-trees/providers/OpeningTreeProvider';
 
 type TreeSelectorProps = {
   selectedTree: string;
