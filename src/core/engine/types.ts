@@ -10,9 +10,10 @@ export interface AnalysisResult {
   time: number;
   nodes: number;
   nps: number;
-  scoreType: "cp" | "mate";
+  scoreType: 'cp' | 'mate';
   score: number;
   pv: string[];
+  multipv?: number; // For multi-variation analysis
 }
 
 export interface UseEngineWorker {
@@ -22,7 +23,7 @@ export interface UseEngineWorker {
 }
 
 export interface EngineMessage {
-  type: "ready" | "output" | "error";
+  type: 'ready' | 'output' | 'error';
   text?: string;
   message?: string;
 }
