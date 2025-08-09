@@ -14,6 +14,7 @@ import { useOpeningTree } from '~/features/opening-trees/providers/OpeningTreePr
 import { MovePane } from '~/features/move-pane/components/MovePane';
 import { toDests } from '~/features/explorer/lib/moves';
 import { createChessFromFen } from '~/features/explorer/lib/fen';
+import { EngineAnalysis } from '~/features/engine-analysis/components/EngineAnalysis';
 
 type ExplorerPaneProps = {
   tree: string;
@@ -132,6 +133,7 @@ export const ExplorerPane = ({
             onMoveClick={handleSetPosition}
           />
         </div>
+        <EngineAnalysis />
         <TreeSelector selectedTree={selectedTree} onTreeChange={handleTreeChange} />
         {currentPos !== undefined && (
           <div className="flex-[3] overflow-y-auto">
