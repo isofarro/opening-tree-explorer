@@ -133,7 +133,7 @@ export const ExplorerPane = ({
             onMoveClick={handleSetPosition}
           />
         </div>
-        <EngineAnalysis />
+        <EngineAnalysis position={currentFen} />
         <TreeSelector selectedTree={selectedTree} onTreeChange={handleTreeChange} />
         {currentPos !== undefined && (
           <div className="flex-[3] overflow-y-auto">

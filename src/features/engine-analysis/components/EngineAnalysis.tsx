@@ -1,11 +1,18 @@
+import { useState } from 'react';
 import { useUciEngine } from '~/core/engine';
 import { useStockfish } from '~/core/engine/engines/useStockfish';
-import { useState } from 'react';
 import type { AnalysisResult } from '~/core/engine/types';
+import type { FenString } from '~/core/types';
+import { formatEval } from '../lib/uci';
 
-export const EngineAnalysis = () => {
+type EngineAnalysisProps = {
+  position: FenString;
+}
+
+export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
   const stockfishEngine = useStockfish();
   const [analysisHistory, setAnalysisHistory] = useState<AnalysisResult[]>([]);
+  const [maxDepth, setMaxDepth] = useState<number>(0);
 
   const { startAnalysis, stopAnalysis, isReady, isAnalyzing, currentResults } = useUciEngine({
     engineWorker: stockfishEngine,
@@ -13,43 +20,52 @@ export const EngineAnalysis = () => {
       // This callback is called for each new analysis result
       console.log('New analysis result:', result);
       setAnalysisHistory((prev) => [...prev, result]);
+      setMaxDepth(Math.max(maxDepth, result.depth));
     },
   });
 
   const analyzePosition = () => {
     if (!isReady) return;
 
-    startAnalysis('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', {
-      depth: 20,
+    setMaxDepth(0);
+    startAnalysis(position, {
       numVariations: 3,
     });
   };
 
   return (
-    <div>
-      <button onClick={analyzePosition} disabled={!isReady || isAnalyzing}>
-        Start Analysis
-      </button>
-      <button onClick={stopAnalysis} disabled={!isAnalyzing}>
-        Stop Analysis
-      </button>
+    <section>
+      <header>
+        <div>
+          {isAnalyzing ? (
+            <button onClick={stopAnalysis} disabled={!isAnalyzing}>
+              Stop Analysis
+            </button>
+          ) : (
+            <button onClick={analyzePosition} disabled={!isReady || isAnalyzing}>
+              Start Analysis
+            </button>
+          )}
+          <span>Ready: {isReady.toString()}</span>
+          <span> | Analyzing: {isAnalyzing.toString()}</span>
+        </div>
+      </header>
       <div>
-        <span>Ready: {isReady.toString()}</span>
-        <span> | Analyzing: {isAnalyzing.toString()}</span>
+        {currentResults
+          // .filter((result) => result.depth === maxDepth)
+          .slice(-3)
+          .sort((a, b) => (a.multipv || 1) - (b.multipv || 1))
+          .map((result) => (
+            <div key={`${result.depth}-${result.multipv || 1}`}>
+              <strong>{result.multipv || 1}.</strong>
+              {' '}
+              {formatEval(result.score, result.scoreType)}/{result.depth}: {' '}
+              {result.pv.slice(0, 5).join(' ')}
+            </div>
+          ))
+        }
       </div>
-
-      <div>
-        <h4>Current Best Results:</h4>
-        {currentResults.map((result) => (
-          <div key={`${result.depth}-${result.multipv || 1}`}>
-            <strong>Variation {result.multipv || 1}:</strong>
-            Depth {result.depth}, Score: {result.score} {result.scoreType}, PV:{' '}
-            {result.pv.slice(0, 5).join(' ')}
-          </div>
-        ))}
-      </div>
-
-      <div>
+      {/* <div>
         <h4>Analysis Stream ({analysisHistory.length} updates):</h4>
         <div style={{ maxHeight: 200, overflow: 'auto' }}>
           {analysisHistory.slice(-10).map((result, index) => (
@@ -59,7 +75,7 @@ export const EngineAnalysis = () => {
             </div>
           ))}
         </div>
-      </div>
-    </div>
+      </div> */}
+    </section>
   );
 };
