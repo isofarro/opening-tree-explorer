@@ -114,17 +114,19 @@ export function useStockfish(): UseEngineWorker {
       if (workerRef.current && workerAlive) {
         const timeSinceLastActivity = Date.now() - lastNonAnalysisActivityRef.current;
 
-        // Only check health when NOT analyzing, or if it's been a very long time
+        // Only check health when analyzing, or if it's been a very long time when not analyzing
         if (!isAnalyzingRef.current) {
-          // If not analyzing and no response for 30 seconds, check health
-          if (timeSinceLastActivity > 30000) {
+          // When not analyzing, only check health if it's been more than 5 minutes of inactivity
+          // This prevents unnecessary health checks during normal idle periods
+          if (timeSinceLastActivity > 300000) {
+            // 5 minutes instead of 30 seconds
             try {
               workerRef.current.postMessage('isready');
 
               // Give it 10 seconds to respond
               setTimeout(() => {
                 const currentTimeSinceActivity = Date.now() - lastNonAnalysisActivityRef.current;
-                if (currentTimeSinceActivity > 40000 && !isAnalyzingRef.current) {
+                if (currentTimeSinceActivity > 310000 && !isAnalyzingRef.current) {
                   handleWorkerError('Health check timeout (not analyzing)');
                 }
               }, 10000);
