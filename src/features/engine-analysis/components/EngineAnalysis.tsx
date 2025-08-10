@@ -90,18 +90,7 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
           )}
           <span>Ready: {isReady.toString()}</span>
           <span> | Analyzing: {isAnalyzing.toString()}</span>
-          {/* <label>
-            <input
-              type="checkbox"
-              checked={autoAnalyze}
-              onChange={toggleAutoAnalyze}
-            />
-            Auto-analyze
-          </label> */}
         </div>
-        {/* <div>
-          <span>{position}</span>
-        </div> */}
       </header>
       <div>
         {currentResults
@@ -109,8 +98,10 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
           .sort((a, b) => (a.multipv || 1) - (b.multipv || 1))
           .map((result) => (
             <div key={`${result.depth}-${result.multipv || 1}`}>
-              <strong>{result.multipv || 1}.</strong> {formatEval(result.score, result.scoreType)}/
-              {result.depth}: {result.pv.slice(0, 5).join(' ')}
+              <strong>
+                {result.multipv || 1}. {formatEval(result.score, result.scoreType)}/{result.depth}
+              </strong>
+              : {result.pv.join(' ')}
             </div>
           ))}
       </div>
