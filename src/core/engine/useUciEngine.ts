@@ -28,9 +28,94 @@ export function useUciEngine({
     isRunning: boolean;
     numVariations: number;
     startTime: number;
-  }>({ isRunning: false, numVariations: 1, startTime: 0 });
+    depthTimes: Map<number, number>;
+    lastActivityTime: number; // Track last activity instead of depth completion
+    currentDepth: number;
+  }>({
+    isRunning: false,
+    numVariations: 1,
+    startTime: 0,
+    depthTimes: new Map(),
+    lastActivityTime: 0,
+    currentDepth: 0,
+  });
+
+  // Function to calculate adaptive timeout based on recent activity
+  const calculateAdaptiveTimeout = useCallback((currentDepth: number): number => {
+    const depthTimes = analysisStateRef.current.depthTimes;
+
+    if (depthTimes.size > 0) {
+      const recentDepths = Array.from(depthTimes.entries())
+        .filter(([depth]) => depth >= Math.max(1, currentDepth - 3))
+        .map(([, time]) => time);
+
+      if (recentDepths.length > 0) {
+        const avgRecentTime =
+          recentDepths.reduce((sum, time) => sum + time, 0) / recentDepths.length;
+        // Use 3x the average recent depth time for safety, min 3 minutes, max 45 minutes
+        const adaptiveTimeout = Math.max(180000, Math.min(2700000, avgRecentTime * 3));
+        return adaptiveTimeout;
+      }
+    }
+
+    // Fallback: scale with depth, starting at 5 minutes
+    const fallbackTimeout = Math.min(
+      2700000,
+      300000 * Math.pow(1.3, Math.max(0, currentDepth - 15))
+    );
+    return fallbackTimeout;
+  }, []);
+
+  // Function to reset timeout on any analysis activity
+  const resetAnalysisTimeout = useCallback(() => {
+    if (analysisStateRef.current.isRunning) {
+      analysisStateRef.current.lastActivityTime = Date.now();
+
+      // Clear existing timeout
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current);
+      }
+
+      const adaptiveTimeout = calculateAdaptiveTimeout(analysisStateRef.current.currentDepth);
+      console.log(
+        `Resetting timeout: ${Math.round(adaptiveTimeout / 1000)}s (depth ${analysisStateRef.current.currentDepth})`
+      );
+
+      analysisTimeoutRef.current = setTimeout(() => {
+        if (analysisStateRef.current.isRunning) {
+          const timeSinceActivity = Date.now() - analysisStateRef.current.lastActivityTime;
+          console.warn(
+            `Analysis timeout: no output for ${Math.round(timeSinceActivity / 1000)}s, stopping...`
+          );
+          stopAnalysis();
+        }
+      }, adaptiveTimeout);
+    }
+  }, [calculateAdaptiveTimeout]);
+
+  // Track depth completion for statistics only
+  const updateDepthStats = useCallback((newDepth: number) => {
+    if (newDepth > analysisStateRef.current.currentDepth) {
+      const now = Date.now();
+      const previousDepth = analysisStateRef.current.currentDepth;
+
+      // Record time taken for the previous depth (for statistics)
+      if (previousDepth > 0 && analysisStateRef.current.lastActivityTime > 0) {
+        const depthTime = now - (analysisStateRef.current.lastActivityTime - 60000); // Rough estimate
+        analysisStateRef.current.depthTimes.set(previousDepth, depthTime);
+        console.log(
+          `Depth ${previousDepth} completed in approximately ${Math.round(depthTime / 1000)}s`
+        );
+      }
+
+      analysisStateRef.current.currentDepth = newDepth;
+    }
+  }, []);
 
   const analysisTimeoutRef = useRef<NodeJS.Timeout>(null);
+
+  // Remove the entire updateAdaptiveTimeout function (lines 97-127)
+  // Remove the depthCompletionTracker declaration (line 141)
 
   useEffect(() => {
     setIsReady(engineWorker.ready);
@@ -55,6 +140,14 @@ export function useUciEngine({
         if (message.startsWith('info') && analysisStateRef.current.isRunning) {
           const result = parseUciInfo(message);
           if (result) {
+            // Reset timeout on ANY analysis result
+            resetAnalysisTimeout();
+
+            // Update depth statistics
+            if (result.depth > analysisStateRef.current.currentDepth) {
+              updateDepthStats(result.depth);
+            }
+
             // Update current results state
             setCurrentResults((prevResults) => {
               const existingIndex = prevResults.findIndex(
@@ -70,7 +163,6 @@ export function useUciEngine({
                 newResults = [...prevResults, result];
               }
 
-              // Limit results to prevent memory issues
               return newResults.slice(-100);
             });
 
@@ -131,13 +223,24 @@ export function useUciEngine({
         } else {
           goCommand += ' infinite';
 
-          // Set safety timeout for infinite analysis (15 minutes)
+          // Reset analysis tracking
+          analysisStateRef.current.depthTimes.clear();
+          analysisStateRef.current.currentDepth = 0;
+          analysisStateRef.current.lastActivityTime = Date.now();
+
+          // Set initial timeout (5 minutes)
+          const initialTimeout = 300000;
+          console.log(
+            `Starting analysis with initial timeout: ${Math.round(initialTimeout / 1000)}s`
+          );
           analysisTimeoutRef.current = setTimeout(() => {
             if (analysisStateRef.current.isRunning) {
-              console.warn('Analysis timeout reached (15 minutes), stopping...');
+              console.warn(
+                `Initial analysis timeout reached (${Math.round(initialTimeout / 1000)}s), stopping...`
+              );
               stopAnalysis();
             }
-          }, 900000); // 15 minutes
+          }, initialTimeout);
         }
 
         engineWorker.send(goCommand);
