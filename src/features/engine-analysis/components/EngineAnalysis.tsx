@@ -7,7 +7,7 @@ import { formatEval } from '../lib/uci';
 
 type EngineAnalysisProps = {
   position: FenString;
-}
+};
 
 export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
   const stockfishEngine = useStockfish();
@@ -57,13 +57,10 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
           .sort((a, b) => (a.multipv || 1) - (b.multipv || 1))
           .map((result) => (
             <div key={`${result.depth}-${result.multipv || 1}`}>
-              <strong>{result.multipv || 1}.</strong>
-              {' '}
-              {formatEval(result.score, result.scoreType)}/{result.depth}: {' '}
-              {result.pv.slice(0, 5).join(' ')}
+              <strong>{result.multipv || 1}.</strong> {formatEval(result.score, result.scoreType)}/
+              {result.depth}: {result.pv.slice(0, 5).join(' ')}
             </div>
-          ))
-        }
+          ))}
       </div>
       {/* <div>
         <h4>Analysis Stream ({analysisHistory.length} updates):</h4>
