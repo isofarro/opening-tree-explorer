@@ -22,63 +22,73 @@ export function useUciEngine({
   const [isReady, setIsReady] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentResults, setCurrentResults] = useState<AnalysisResult[]>([]);
+
   const outputIndexRef = useRef(0);
   const analysisStateRef = useRef<{
     isRunning: boolean;
     numVariations: number;
-  }>({ isRunning: false, numVariations: 1 });
+    startTime: number;
+  }>({ isRunning: false, numVariations: 1, startTime: 0 });
+
+  const analysisTimeoutRef = useRef<NodeJS.Timeout>(null);
 
   useEffect(() => {
-    // Reset ready state when engine changes
     setIsReady(engineWorker.ready);
   }, [engineWorker.ready]);
 
   useEffect(() => {
-    // Monitor output for UCI messages
     const newOutput = engineWorker.output.slice(outputIndexRef.current);
     outputIndexRef.current = engineWorker.output.length;
 
     newOutput.forEach((message) => {
-      if (message.includes('uciok')) {
-        setIsReady(true);
-        return;
-      }
-
-      if (message.includes('readyok')) {
-        return;
-      }
-
-      // Parse analysis output
-      if (message.startsWith('info') && analysisStateRef.current.isRunning) {
-        const result = parseUciInfo(message);
-        if (result) {
-          // Update current results state
-          setCurrentResults((prevResults) => {
-            const existingIndex = prevResults.findIndex(
-              (r) =>
-                r.depth === result.depth && (result.multipv ? r.multipv === result.multipv : true)
-            );
-
-            let newResults;
-            if (existingIndex >= 0) {
-              newResults = [...prevResults];
-              newResults[existingIndex] = result;
-            } else {
-              newResults = [...prevResults, result];
-            }
-
-            return newResults;
-          });
-
-          // Call the callback if provided
-          onAnalysisUpdate?.(result);
+      try {
+        if (message.includes('uciok')) {
+          setIsReady(true);
+          return;
         }
-      }
 
-      // Analysis complete
-      if (message.startsWith('bestmove') && analysisStateRef.current.isRunning) {
-        setIsAnalyzing(false);
-        analysisStateRef.current.isRunning = false;
+        if (message.includes('readyok')) {
+          return;
+        }
+
+        // Parse analysis output
+        if (message.startsWith('info') && analysisStateRef.current.isRunning) {
+          const result = parseUciInfo(message);
+          if (result) {
+            // Update current results state
+            setCurrentResults((prevResults) => {
+              const existingIndex = prevResults.findIndex(
+                (r) =>
+                  r.depth === result.depth && (result.multipv ? r.multipv === result.multipv : true)
+              );
+
+              let newResults;
+              if (existingIndex >= 0) {
+                newResults = [...prevResults];
+                newResults[existingIndex] = result;
+              } else {
+                newResults = [...prevResults, result];
+              }
+
+              // Limit results to prevent memory issues
+              return newResults.slice(-100);
+            });
+
+            onAnalysisUpdate?.(result);
+          }
+        }
+
+        // Analysis complete
+        if (message.startsWith('bestmove') && analysisStateRef.current.isRunning) {
+          setIsAnalyzing(false);
+          analysisStateRef.current.isRunning = false;
+
+          if (analysisTimeoutRef.current) {
+            clearTimeout(analysisTimeoutRef.current);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing UCI message:', error, 'Message:', message);
       }
     });
   }, [engineWorker.output, onAnalysisUpdate]);
@@ -98,40 +108,73 @@ export function useUciEngine({
       setCurrentResults([]);
       setIsAnalyzing(true);
       analysisStateRef.current.isRunning = true;
+      analysisStateRef.current.startTime = Date.now();
 
       // Configure analysis options
       const { depth, time, numVariations = 1 } = options;
       analysisStateRef.current.numVariations = numVariations;
 
-      // Set position
-      engineWorker.send(`position fen ${fen}`);
+      try {
+        // Set position
+        engineWorker.send(`position fen ${fen}`);
 
-      if (numVariations > 1) {
-        engineWorker.send(`setoption name MultiPV value ${numVariations}`);
+        if (numVariations > 1) {
+          engineWorker.send(`setoption name MultiPV value ${numVariations}`);
+        }
+
+        // Start analysis
+        let goCommand = 'go';
+        if (depth !== undefined) {
+          goCommand += ` depth ${depth}`;
+        } else if (time !== undefined) {
+          goCommand += ` movetime ${time}`;
+        } else {
+          goCommand += ' infinite';
+
+          // Set safety timeout for infinite analysis (15 minutes)
+          analysisTimeoutRef.current = setTimeout(() => {
+            if (analysisStateRef.current.isRunning) {
+              console.warn('Analysis timeout reached (15 minutes), stopping...');
+              stopAnalysis();
+            }
+          }, 900000); // 15 minutes
+        }
+
+        engineWorker.send(goCommand);
+      } catch (error) {
+        console.error('Error starting analysis:', error);
+        setIsAnalyzing(false);
+        analysisStateRef.current.isRunning = false;
       }
-
-      // Start analysis
-      let goCommand = 'go';
-      if (depth !== undefined) {
-        goCommand += ` depth ${depth}`;
-      } else if (time !== undefined) {
-        goCommand += ` movetime ${time}`;
-      } else {
-        goCommand += ' infinite';
-      }
-
-      engineWorker.send(goCommand);
     },
     [isReady, engineWorker]
   );
 
   const stopAnalysis = useCallback(() => {
     if (analysisStateRef.current.isRunning) {
-      engineWorker.send('stop');
+      try {
+        engineWorker.send('stop');
+      } catch (error) {
+        console.error('Error stopping analysis:', error);
+      }
+
       setIsAnalyzing(false);
       analysisStateRef.current.isRunning = false;
+
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current);
+      }
     }
   }, [engineWorker]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return {
     startAnalysis,
