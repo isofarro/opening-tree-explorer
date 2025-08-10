@@ -24,13 +24,15 @@ export function useUciEngine({
   const [currentResults, setCurrentResults] = useState<AnalysisResult[]>([]);
 
   const outputIndexRef = useRef(0);
+  const currentPositionRef = useRef<string>(''); // Track current position
   const analysisStateRef = useRef<{
     isRunning: boolean;
     numVariations: number;
     startTime: number;
     depthTimes: Map<number, number>;
-    lastActivityTime: number; // Track last activity instead of depth completion
+    lastActivityTime: number;
     currentDepth: number;
+    positionFen: string; // Add position tracking
   }>({
     isRunning: false,
     numVariations: 1,
@@ -38,6 +40,7 @@ export function useUciEngine({
     depthTimes: new Map(),
     lastActivityTime: 0,
     currentDepth: 0,
+    positionFen: '',
   });
 
   // Function to calculate adaptive timeout based on recent activity
@@ -140,43 +143,55 @@ export function useUciEngine({
         if (message.startsWith('info') && analysisStateRef.current.isRunning) {
           const result = parseUciInfo(message);
           if (result) {
-            // Reset timeout on ANY analysis result
-            resetAnalysisTimeout();
+            // Only process results if they're for the current position
+            // We do this by checking if analysis is still running for the same position
+            if (analysisStateRef.current.positionFen === currentPositionRef.current) {
+              // Reset timeout on ANY analysis result
+              resetAnalysisTimeout();
 
-            // Update depth statistics
-            if (result.depth > analysisStateRef.current.currentDepth) {
-              updateDepthStats(result.depth);
-            }
-
-            // Update current results state
-            setCurrentResults((prevResults) => {
-              const existingIndex = prevResults.findIndex(
-                (r) =>
-                  r.depth === result.depth && (result.multipv ? r.multipv === result.multipv : true)
-              );
-
-              let newResults;
-              if (existingIndex >= 0) {
-                newResults = [...prevResults];
-                newResults[existingIndex] = result;
-              } else {
-                newResults = [...prevResults, result];
+              // Update depth statistics
+              if (result.depth > analysisStateRef.current.currentDepth) {
+                updateDepthStats(result.depth);
               }
 
-              return newResults.slice(-100);
-            });
+              // Update current results state
+              setCurrentResults((prevResults) => {
+                const existingIndex = prevResults.findIndex(
+                  (r) =>
+                    r.depth === result.depth &&
+                    (result.multipv ? r.multipv === result.multipv : true)
+                );
 
-            onAnalysisUpdate?.(result);
+                let newResults;
+                if (existingIndex >= 0) {
+                  newResults = [...prevResults];
+                  newResults[existingIndex] = result;
+                } else {
+                  newResults = [...prevResults, result];
+                }
+
+                return newResults.slice(-100);
+              });
+
+              onAnalysisUpdate?.(result);
+            } else {
+              console.log('Ignoring stale analysis result from previous position');
+            }
           }
         }
 
         // Analysis complete
         if (message.startsWith('bestmove') && analysisStateRef.current.isRunning) {
-          setIsAnalyzing(false);
-          analysisStateRef.current.isRunning = false;
+          // Only process bestmove if it's for the current position
+          if (analysisStateRef.current.positionFen === currentPositionRef.current) {
+            setIsAnalyzing(false);
+            analysisStateRef.current.isRunning = false;
 
-          if (analysisTimeoutRef.current) {
-            clearTimeout(analysisTimeoutRef.current);
+            if (analysisTimeoutRef.current) {
+              clearTimeout(analysisTimeoutRef.current);
+            }
+          } else {
+            console.log('Ignoring stale bestmove from previous position');
           }
         }
       } catch (error) {
@@ -186,27 +201,54 @@ export function useUciEngine({
   }, [engineWorker.output, onAnalysisUpdate]);
 
   const startAnalysis = useCallback(
-    (fen: string, options: AnalysisOptions = {}) => {
+    async (fen: string, options: AnalysisOptions = {}) => {
       if (!isReady) {
         console.warn('Engine is not ready');
         return;
       }
 
+      // If already analyzing, stop and wait for clean shutdown
       if (analysisStateRef.current.isRunning) {
-        stopAnalysis();
+        console.log('Stopping previous analysis before starting new one');
+        // Call stopAnalysis inline instead of referencing it
+        if (analysisStateRef.current.isRunning) {
+          try {
+            engineWorker.send('stop');
+          } catch (error) {
+            console.error('Error stopping analysis:', error);
+          }
+
+          setIsAnalyzing(false);
+          analysisStateRef.current.isRunning = false;
+
+          if (analysisTimeoutRef.current) {
+            clearTimeout(analysisTimeoutRef.current);
+          }
+        }
+
+        // Wait a brief moment for the stop command to be processed
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
-      // Clear previous results
+      // Clear previous results and reset all state
       setCurrentResults([]);
       setIsAnalyzing(true);
       analysisStateRef.current.isRunning = true;
       analysisStateRef.current.startTime = Date.now();
+      analysisStateRef.current.depthTimes.clear();
+      analysisStateRef.current.currentDepth = 0;
+      analysisStateRef.current.lastActivityTime = Date.now();
+      analysisStateRef.current.positionFen = fen; // Track the position we're analyzing
+      currentPositionRef.current = fen; // Update current position reference
 
       // Configure analysis options
       const { depth, time, numVariations = 1 } = options;
       analysisStateRef.current.numVariations = numVariations;
 
       try {
+        // Ensure engine is ready before setting position
+        engineWorker.send('isready');
+
         // Set position
         engineWorker.send(`position fen ${fen}`);
 
@@ -223,11 +265,6 @@ export function useUciEngine({
         } else {
           goCommand += ' infinite';
 
-          // Reset analysis tracking
-          analysisStateRef.current.depthTimes.clear();
-          analysisStateRef.current.currentDepth = 0;
-          analysisStateRef.current.lastActivityTime = Date.now();
-
           // Set initial timeout (5 minutes)
           const initialTimeout = 300000;
           console.log(
@@ -238,12 +275,27 @@ export function useUciEngine({
               console.warn(
                 `Initial analysis timeout reached (${Math.round(initialTimeout / 1000)}s), stopping...`
               );
-              stopAnalysis();
+              // Inline stop logic here too
+              if (analysisStateRef.current.isRunning) {
+                try {
+                  engineWorker.send('stop');
+                } catch (error) {
+                  console.error('Error stopping analysis:', error);
+                }
+
+                setIsAnalyzing(false);
+                analysisStateRef.current.isRunning = false;
+
+                if (analysisTimeoutRef.current) {
+                  clearTimeout(analysisTimeoutRef.current);
+                }
+              }
             }
           }, initialTimeout);
         }
 
         engineWorker.send(goCommand);
+        console.log(`Started analysis for position: ${fen}`);
       } catch (error) {
         console.error('Error starting analysis:', error);
         setIsAnalyzing(false);
