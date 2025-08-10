@@ -124,7 +124,7 @@ export const ExplorerPane = ({
           ))}
         </div>
       </div>
-      <div className="tree-table w-[480px] h-[560px] flex flex-col">
+      <div className="tree-table w-[480px] flex flex-col">
         <div className="flex-[2] border-b border-gray-600 overflow-y-auto">
           <MovePane
             rootFen={position}

@@ -13,8 +13,8 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
   const stockfishEngine = useStockfish();
   const [analysisHistory, setAnalysisHistory] = useState<AnalysisResult[]>([]);
   const [maxDepth, setMaxDepth] = useState<number>(0);
-  const [autoAnalyze, setAutoAnalyze] = useState<boolean>(false);
   const currentAnalysisPosition = useRef<FenString | null>(null);
+  const numVariations = 3;
 
   const { startAnalysis, stopAnalysis, isReady, isAnalyzing, currentResults } = useUciEngine({
     engineWorker: stockfishEngine,
@@ -26,35 +26,18 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
     },
   });
 
-  useEffect(() => {
-    console.log('[EngineAnalysis] position changed:', position);
-  }, [position]);
-
   // Auto-analyze when position changes OR restart analysis if position changed during analysis
   useEffect(() => {
     if (isReady && position) {
-      // If auto-analyze is enabled, always start analysis
-      if (autoAnalyze) {
-        console.log('Position changed, starting analysis for:', position);
-        setMaxDepth(0);
-        setAnalysisHistory([]);
-        currentAnalysisPosition.current = position;
-        startAnalysis(position, {
-          numVariations: 3,
-        });
-      }
-      // If currently analyzing and position changed, restart for new position
-      else if (isAnalyzing && currentAnalysisPosition.current !== position) {
+      if (isAnalyzing && currentAnalysisPosition.current !== position) {
         console.log('Position changed during analysis, restarting for:', position);
         setMaxDepth(0);
         setAnalysisHistory([]);
         currentAnalysisPosition.current = position;
-        startAnalysis(position, {
-          numVariations: 3,
-        });
+        startAnalysis(position, { numVariations });
       }
     }
-  }, [position, isReady, autoAnalyze, isAnalyzing, startAnalysis]);
+  }, [position, isReady, isAnalyzing, startAnalysis]);
 
   const analyzePosition = () => {
     if (!isReady) return;
@@ -62,17 +45,7 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
     setMaxDepth(0);
     setAnalysisHistory([]);
     currentAnalysisPosition.current = position;
-    startAnalysis(position, {
-      numVariations: 3,
-    });
-  };
-
-  const toggleAutoAnalyze = () => {
-    setAutoAnalyze(!autoAnalyze);
-    if (!autoAnalyze && isReady && position) {
-      // If turning on auto-analyze, start analysis immediately
-      analyzePosition();
-    }
+    startAnalysis(position, { numVariations });
   };
 
   return (
@@ -90,27 +63,18 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
           )}
           <span>Ready: {isReady.toString()}</span>
           <span> | Analyzing: {isAnalyzing.toString()}</span>
-          {/* <label>
-            <input
-              type="checkbox"
-              checked={autoAnalyze}
-              onChange={toggleAutoAnalyze}
-            />
-            Auto-analyze
-          </label> */}
         </div>
-        {/* <div>
-          <span>{position}</span>
-        </div> */}
       </header>
       <div>
         {currentResults
-          .slice(-3)
+          .slice(-numVariations)
           .sort((a, b) => (a.multipv || 1) - (b.multipv || 1))
           .map((result) => (
             <div key={`${result.depth}-${result.multipv || 1}`}>
-              <strong>{result.multipv || 1}.</strong> {formatEval(result.score, result.scoreType)}/
-              {result.depth}: {result.pv.slice(0, 5).join(' ')}
+              <strong>
+                {result.multipv || 1}. {formatEval(result.score, result.scoreType)}/{result.depth}
+              </strong>
+              : {result.pv.join(' ')}
             </div>
           ))}
       </div>

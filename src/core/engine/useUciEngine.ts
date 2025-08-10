@@ -25,6 +25,10 @@ export function useUciEngine({
 
   const outputIndexRef = useRef(0);
   const currentPositionRef = useRef<string>(''); // Track current position
+  const analysisTimeoutRef = useRef<NodeJS.Timeout>(null);
+  // Add a new ref to track when analysis actually started
+  const analysisStartTimeRef = useRef<number>(0);
+
   const analysisStateRef = useRef<{
     isRunning: boolean;
     numVariations: number;
@@ -115,11 +119,6 @@ export function useUciEngine({
     }
   }, []);
 
-  const analysisTimeoutRef = useRef<NodeJS.Timeout>(null);
-
-  // Remove the entire updateAdaptiveTimeout function (lines 97-127)
-  // Remove the depthCompletionTracker declaration (line 141)
-
   useEffect(() => {
     setIsReady(engineWorker.ready);
   }, [engineWorker.ready]);
@@ -143,9 +142,13 @@ export function useUciEngine({
         if (message.startsWith('info') && analysisStateRef.current.isRunning) {
           const result = parseUciInfo(message);
           if (result) {
-            // Only process results if they're for the current position
-            // We do this by checking if analysis is still running for the same position
-            if (analysisStateRef.current.positionFen === currentPositionRef.current) {
+            // Only process results if they're for the current position AND
+            // the result timestamp is after we started the current analysis
+            const resultTime = Date.now();
+            if (
+              analysisStateRef.current.positionFen === currentPositionRef.current &&
+              resultTime >= analysisStartTimeRef.current
+            ) {
               // Reset timeout on ANY analysis result
               resetAnalysisTimeout();
 
@@ -175,7 +178,9 @@ export function useUciEngine({
 
               onAnalysisUpdate?.(result);
             } else {
-              console.log('Ignoring stale analysis result from previous position');
+              console.log(
+                'Ignoring stale analysis result from previous position or before analysis start'
+              );
             }
           }
         }
@@ -190,15 +195,17 @@ export function useUciEngine({
             if (analysisTimeoutRef.current) {
               clearTimeout(analysisTimeoutRef.current);
             }
+
+            console.log('Analysis completed');
           } else {
             console.log('Ignoring stale bestmove from previous position');
           }
         }
-      } catch (error) {
-        console.error('Error processing UCI message:', error, 'Message:', message);
+      } catch (error: unknown) {
+        console.error('Error processing engine message:', error);
       }
     });
-  }, [engineWorker.output, onAnalysisUpdate]);
+  }, [engineWorker.output, resetAnalysisTimeout, updateDepthStats, onAnalysisUpdate]);
 
   const startAnalysis = useCallback(
     async (fen: string, options: AnalysisOptions = {}) => {
@@ -295,6 +302,7 @@ export function useUciEngine({
         }
 
         engineWorker.send(goCommand);
+        analysisStartTimeRef.current = Date.now(); // Mark when we actually started analysis
         console.log(`Started analysis for position: ${fen}`);
       } catch (error) {
         console.error('Error starting analysis:', error);
