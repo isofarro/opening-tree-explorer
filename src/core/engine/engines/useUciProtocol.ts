@@ -42,10 +42,10 @@ interface PendingCommand {
 }
 
 const DEFAULT_TIMEOUTS = {
-  isReady: 5000,
+  isReady: 8000, // Increased from 5000
   setPosition: 1000,
   setOption: 1000,
-  stop: 2000,
+  stop: 5000, // Increased from 2000
   default: 3000,
 };
 
@@ -167,6 +167,16 @@ export function useUciProtocol(engineWorker: UseEngineWorkerReturn): UseUciProto
 
   const isReady = useCallback(async (): Promise<boolean> => {
     try {
+      // If there are pending stop commands, wait a bit before checking readiness
+      const hasPendingStop = Array.from(pendingCommandsRef.current.values()).some(
+        (cmd) => cmd.command === 'stop'
+      );
+
+      if (hasPendingStop) {
+        // Wait a short time for stop to complete
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
       await sendCommand('isready', 'readyok', DEFAULT_TIMEOUTS.isReady);
       return true;
     } catch (error) {
@@ -233,10 +243,30 @@ export function useUciProtocol(engineWorker: UseEngineWorkerReturn): UseUciProto
 
   const stopAnalysis = useCallback(async (): Promise<void> => {
     try {
-      await sendCommand('stop', 'bestmove', DEFAULT_TIMEOUTS.stop);
+      // Clear any pending commands first to avoid interference
+      const pendingCommands = Array.from(pendingCommandsRef.current.values());
+      pendingCommands.forEach((cmd) => {
+        if (cmd.command !== 'stop') {
+          clearTimeout(cmd.timer);
+          cmd.reject(new Error('Cancelled due to stop command'));
+          pendingCommandsRef.current.delete(cmd.id);
+        }
+      });
+
+      // Send stop command with longer timeout and more flexible response matching
+      await sendCommand(
+        'stop',
+        (message: string) => {
+          return message.startsWith('bestmove') || message.includes('readyok');
+        },
+        DEFAULT_TIMEOUTS.stop
+      );
     } catch (error) {
       // Don't throw on stop errors, just log them
       console.warn('Stop command failed:', error);
+
+      // Force clear any remaining pending commands
+      pendingCommandsRef.current.clear();
     }
   }, [sendCommand]);
 
