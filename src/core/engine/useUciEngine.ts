@@ -47,6 +47,25 @@ export function useUciEngine({
     positionFen: '',
   });
 
+  // Helper function to execute stop command - eliminates code duplication
+  const executeStopCommand = useCallback(() => {
+    if (analysisStateRef.current.isRunning) {
+      try {
+        engineWorker.send('stop');
+      } catch (error) {
+        console.error('Error stopping analysis:', error);
+      }
+
+      setIsAnalyzing(false);
+      analysisStateRef.current.isRunning = false;
+
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current);
+        analysisTimeoutRef.current = null;
+      }
+    }
+  }, [engineWorker]);
+
   // Function to calculate adaptive timeout based on recent activity
   const calculateAdaptiveTimeout = useCallback((currentDepth: number): number => {
     const depthTimes = analysisStateRef.current.depthTimes;
@@ -217,21 +236,7 @@ export function useUciEngine({
       // If already analyzing, stop and wait for clean shutdown
       if (analysisStateRef.current.isRunning) {
         console.log('Stopping previous analysis before starting new one');
-        // Call stopAnalysis inline instead of referencing it
-        if (analysisStateRef.current.isRunning) {
-          try {
-            engineWorker.send('stop');
-          } catch (error) {
-            console.error('Error stopping analysis:', error);
-          }
-
-          setIsAnalyzing(false);
-          analysisStateRef.current.isRunning = false;
-
-          if (analysisTimeoutRef.current) {
-            clearTimeout(analysisTimeoutRef.current);
-          }
-        }
+        executeStopCommand(); // Use helper function
 
         // Wait a brief moment for the stop command to be processed
         await new Promise((resolve) => setTimeout(resolve, 50));
@@ -282,21 +287,7 @@ export function useUciEngine({
               console.warn(
                 `Initial analysis timeout reached (${Math.round(initialTimeout / 1000)}s), stopping...`
               );
-              // Inline stop logic here too
-              if (analysisStateRef.current.isRunning) {
-                try {
-                  engineWorker.send('stop');
-                } catch (error) {
-                  console.error('Error stopping analysis:', error);
-                }
-
-                setIsAnalyzing(false);
-                analysisStateRef.current.isRunning = false;
-
-                if (analysisTimeoutRef.current) {
-                  clearTimeout(analysisTimeoutRef.current);
-                }
-              }
+              executeStopCommand(); // Use helper function
             }
           }, initialTimeout);
         }
@@ -310,25 +301,12 @@ export function useUciEngine({
         analysisStateRef.current.isRunning = false;
       }
     },
-    [isReady, engineWorker]
+    [isReady, engineWorker, executeStopCommand]
   );
 
   const stopAnalysis = useCallback(() => {
-    if (analysisStateRef.current.isRunning) {
-      try {
-        engineWorker.send('stop');
-      } catch (error) {
-        console.error('Error stopping analysis:', error);
-      }
-
-      setIsAnalyzing(false);
-      analysisStateRef.current.isRunning = false;
-
-      if (analysisTimeoutRef.current) {
-        clearTimeout(analysisTimeoutRef.current);
-      }
-    }
-  }, [engineWorker]);
+    executeStopCommand(); // Use helper function
+  }, [executeStopCommand]);
 
   // Cleanup on unmount
   useEffect(() => {
