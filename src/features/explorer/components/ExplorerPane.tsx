@@ -111,8 +111,8 @@ export const ExplorerPane = ({
   };
 
   return (
-    <div className="explorer-pane flex flex-row">
-      <div className="board-container w-[600px]">
+    <div className="flex flex-row h-2/3 mt-15">
+      <div className="w-[600px]">
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
         <div>
           {graphRef.current.getMovePath().map((move, i) => (
