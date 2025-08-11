@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useEngineWorker } from './useEngineWorker';
+import { useUciProtocol } from './useUciProtocol';
 import type { UseEngineWorker } from '../types';
 
 export function useStockfish(): UseEngineWorker {
@@ -13,13 +14,22 @@ export function useStockfish(): UseEngineWorker {
     maxOutputMessages: 500,
   });
 
-  // Adapt the new interface to the existing UseEngineWorker interface
+  const uciProtocol = useUciProtocol(engineWorker);
+
+  // Adapt to the existing UseEngineWorker interface for backward compatibility
   return useMemo(
     () => ({
-      ready: engineWorker.ready,
-      output: engineWorker.output,
-      send: engineWorker.send,
+      ready: uciProtocol.ready,
+      output: uciProtocol.output,
+      send: engineWorker.send, // Keep direct send for backward compatibility
+      // Expose UCI protocol methods for advanced usage
+      uci: uciProtocol,
     }),
-    [engineWorker.ready, engineWorker.output, engineWorker.send]
+    [uciProtocol, engineWorker.send]
   );
+}
+
+// Export the enhanced interface for new code
+export interface EnhancedUseEngineWorker extends UseEngineWorker {
+  uci: ReturnType<typeof useUciProtocol>;
 }

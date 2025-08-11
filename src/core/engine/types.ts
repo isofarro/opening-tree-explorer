@@ -2,6 +2,8 @@ export interface AnalysisOptions {
   depth?: number;
   time?: number;
   numVariations?: number;
+  nodes?: number;
+  infinite?: boolean;
 }
 
 export interface AnalysisResult {
@@ -39,4 +41,20 @@ export interface UciEngineWorker {
   onerror: (event: ErrorEvent) => void;
   postMessage: (message: string) => void;
   terminate: () => void;
+}
+
+// New enhanced interface for UCI protocol support
+export interface EnhancedEngineWorker extends UseEngineWorker {
+  uci: {
+    sendCommand: (
+      command: string,
+      expectedResponse?: string | RegExp | ((message: string) => boolean),
+      timeout?: number
+    ) => Promise<string[]>;
+    isReady: () => Promise<boolean>;
+    setPosition: (fen: string) => Promise<void>;
+    setOption: (name: string, value: string | number) => Promise<void>;
+    startAnalysis: (options?: AnalysisOptions) => Promise<void>;
+    stopAnalysis: () => Promise<void>;
+  };
 }
