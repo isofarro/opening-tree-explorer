@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FenString } from '~/core/types';
 import type { OpeningTree, OpeningTreePosition } from '~/api/types';
 import { Api } from '~/api';
+import { normalizeFen } from '~/features/explorer/lib/fen';
 
 type UseTreeProps = {
   currentPos: OpeningTreePosition | undefined;
@@ -31,8 +32,8 @@ export const useTree = (tree: OpeningTree | undefined, startFen: FenString): Use
         return;
       }
 
-      // Create cache key using both tree name and fen
-      const cacheKey = `${tree.name}-${newFen}`;
+      const normalizedFen = normalizeFen(newFen);
+      const cacheKey = `${tree.name}-${normalizedFen}`;
 
       // Check if position is in cache
       const cachedPosition = positionCache.current.get(cacheKey);
@@ -47,16 +48,13 @@ export const useTree = (tree: OpeningTree | undefined, startFen: FenString): Use
         return;
       }
 
-      // Mark as fetching
       fetchingRef.current.add(cacheKey);
 
       try {
-        // Fetch from server if not in cache
-        const treePosition = await Api.openingTrees.getPositionByFen(tree, newFen);
+        const treePosition = await Api.openingTrees.getPositionByFen(tree, normalizedFen);
         positionCache.current.set(cacheKey, treePosition);
-        updatePosition(treePosition, newFen, 'getPositionByFen');
+        updatePosition(treePosition, normalizedFen, 'getPositionByFen');
       } finally {
-        // Remove from fetching set when done
         fetchingRef.current.delete(cacheKey);
       }
     },

@@ -2,6 +2,7 @@ import type { FenString } from '~/core/types';
 import { MicroServices } from '~/api/services';
 import { ApiClient } from '~/api/client';
 import type { OpeningTree, OpeningTreePosition, OpeningTreePositionResponse } from './types';
+import { normalizeFen } from '~/features/explorer/lib/fen';
 import { transformToOpeningTreePosition } from './transformers';
 
 const getOpeningTrees = async () => {
@@ -12,7 +13,7 @@ const getPositionByFen = async (
   tree: OpeningTree,
   fen: FenString
 ): Promise<OpeningTreePosition> => {
-  const encodedFen = encodeURIComponent(fen);
+  const encodedFen = encodeURIComponent(normalizeFen(fen));
   const response = await ApiClient.get<OpeningTreePositionResponse>(
     tree.path.replace(/\/$/, ''),
     `/${encodedFen}`

@@ -13,7 +13,7 @@ import { TreeSelector } from '~/features/opening-trees/components/TreeSelector';
 import { useOpeningTree } from '~/features/opening-trees/providers/OpeningTreeProvider';
 import { MovePane } from '~/features/move-pane/components/MovePane';
 import { toDests } from '~/features/explorer/lib/moves';
-import { createChessFromFen } from '~/features/explorer/lib/fen';
+import { createChessFromFen, normalizeFen } from '~/features/explorer/lib/fen';
 import { EngineAnalysis } from '~/features/engine-analysis/components/EngineAnalysis';
 
 type ExplorerPaneProps = {
@@ -47,8 +47,9 @@ export const ExplorerPane = ({
 
   const handleSetPosition = (fen: FenString) => {
     gameRef.current = createChessFromFen(fen);
-    setCurrentFen(fen);
-    setPosition(fen);
+    const normalized = normalizeFen(fen);
+    setCurrentFen(normalized);
+    setPosition(normalized);
   };
 
   const handleTreeChange = (newTree: string) => {
@@ -67,10 +68,11 @@ export const ExplorerPane = ({
 
     // Update the current position
     const newFen = game.fen();
-    setCurrentFen(newFen);
+    const normalizedNewFen = normalizeFen(newFen);
+    setCurrentFen(normalizedNewFen);
 
     // Add the move to the graph
-    graphRef.current.addMove(currentFen, { move, toFen: newFen });
+    graphRef.current.addMove(currentFen, { move, toFen: normalizedNewFen });
 
     // Update the position tree.
     makeMove(move);
@@ -85,7 +87,9 @@ export const ExplorerPane = ({
         after: (orig: Key, dest: Key) => {
           const game = gameRef.current;
           const move = game.move({ from: orig, to: dest }, { dry_run: true });
-          move && handleMove(move.san);
+          if (move) {
+            handleMove(move.san);
+          }
         },
       },
     },
@@ -133,7 +137,7 @@ export const ExplorerPane = ({
             onMoveClick={handleSetPosition}
           />
         </div>
-        <EngineAnalysis position={currentFen} />
+        <EngineAnalysis position={gameRef.current.fen()} />
         <TreeSelector selectedTree={selectedTree} onTreeChange={handleTreeChange} />
         {currentPos !== undefined && (
           <div className="flex-[3] overflow-y-auto">
