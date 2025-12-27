@@ -15,6 +15,7 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.12",
     "chess.ts": "^0.16.2",
     "chessground": "^9.2.1",
     "react": "^19.1.0",

@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 
 // Mock Worker for testing
-const MockWorker = function (this: any, url: string | URL, options?: WorkerOptions) {
+const MockWorker = function (this: any, url: string | URL, _options?: WorkerOptions) {
   this.url = url;
   this.postMessage = vi.fn();
   this.terminate = vi.fn();
