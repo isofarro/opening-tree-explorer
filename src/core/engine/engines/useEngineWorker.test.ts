@@ -120,7 +120,7 @@ describe('useEngineWorker', () => {
   });
 
   it('should restart worker on error', async () => {
-    const { result } = renderHook(() => useEngineWorker(defaultOptions));
+    renderHook(() => useEngineWorker(defaultOptions));
 
     const firstWorker = MockWorkerSpy.mock.results[0].value;
 
@@ -139,7 +139,7 @@ describe('useEngineWorker', () => {
   });
 
   it('should perform health checks', () => {
-    const { result } = renderHook(() => useEngineWorker(defaultOptions));
+    renderHook(() => useEngineWorker(defaultOptions));
 
     mockWorker = MockWorkerSpy.mock.results[0].value;
 
@@ -160,7 +160,7 @@ describe('useEngineWorker', () => {
   });
 
   it('should terminate worker on unmount', () => {
-    const { result, unmount } = renderHook(() => useEngineWorker(defaultOptions));
+    const { unmount } = renderHook(() => useEngineWorker(defaultOptions));
 
     mockWorker = MockWorkerSpy.mock.results[0].value;
 

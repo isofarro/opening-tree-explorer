@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useUciEngine } from '~/core/engine';
 import { useStockfish } from '~/core/engine/engines/useStockfish';
-import type { AnalysisResult } from '~/core/engine/types';
+import type { EnhancedUseEngineWorker } from '~/core/engine/engines/useStockfish';
 import type { FenString } from '~/core/types';
 import { formatEval } from '../lib/uci';
 
@@ -11,17 +11,15 @@ type EngineAnalysisProps = {
 
 export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
   const stockfishEngine = useStockfish();
-  const [analysisHistory, setAnalysisHistory] = useState<AnalysisResult[]>([]);
   const [maxDepth, setMaxDepth] = useState<number>(0);
   const currentAnalysisPosition = useRef<FenString | null>(null);
   const numVariations = 3;
 
   const { startAnalysis, stopAnalysis, isReady, isAnalyzing, currentResults } = useUciEngine({
-    engineWorker: stockfishEngine,
+    engineWorker: stockfishEngine as EnhancedUseEngineWorker,
     onAnalysisUpdate: (result) => {
       // This callback is called for each new analysis result
       console.log('New analysis result:', result);
-      setAnalysisHistory((prev) => [...prev, result]);
       setMaxDepth(Math.max(maxDepth, result.depth));
     },
   });
@@ -32,7 +30,6 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
       if (isAnalyzing && currentAnalysisPosition.current !== position) {
         console.log('Position changed during analysis, restarting for:', position);
         setMaxDepth(0);
-        setAnalysisHistory([]);
         currentAnalysisPosition.current = position;
         startAnalysis(position, { numVariations });
       }
@@ -43,7 +40,6 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
     if (!isReady) return;
 
     setMaxDepth(0);
-    setAnalysisHistory([]);
     currentAnalysisPosition.current = position;
     startAnalysis(position, { numVariations });
   };
