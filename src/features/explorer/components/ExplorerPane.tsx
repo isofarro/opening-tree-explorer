@@ -14,6 +14,7 @@ import { useOpeningTree } from '~/features/opening-trees/providers/OpeningTreePr
 import { MovePane } from '~/features/move-pane/components/MovePane';
 import { toDests } from '~/features/explorer/lib/moves';
 import { createChessFromFen, normalizeFen } from '~/features/explorer/lib/fen';
+import { EngineAnalysis as CloudAnalysis } from '~/features/analysis/components/EngineAnalysis';
 import { EngineAnalysis } from '~/features/engine-analysis/components/EngineAnalysis';
 
 type ExplorerPaneProps = {
@@ -118,7 +119,7 @@ export const ExplorerPane = ({
     <div className="flex flex-row h-2/3 mt-15">
       <div className="w-[600px]">
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
-        <div>
+        <div className="mr-8">
           {graphRef.current.getMovePath().map((move, i) => (
             <span key={i}>
               <span className="text-nowrap">
@@ -126,6 +127,9 @@ export const ExplorerPane = ({
               </span>{' '}
             </span>
           ))}
+        </div>
+        <div className="mr-8">
+          <CloudAnalysis position={gameRef.current.fen()} />
         </div>
       </div>
       <div className="tree-table w-[480px] flex flex-col">
