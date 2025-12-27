@@ -10,12 +10,12 @@ The `useUciEngine` hook takes a `UseEngineWorker` object as an argument, which i
 import { useStockfish, useUciEngine } from '~/core/engine';
 
 const stockfishEngine = useStockfish();
-const uciEngine = useUciEngine({ 
+const uciEngine = useUciEngine({
   engineWorker: stockfishEngine,
   onAnalysisUpdate: (result) => {
     // Handle real-time analysis updates
     console.log('Analysis update:', result);
-  }
+  },
 });
 ```
 
@@ -77,4 +77,3 @@ The `useUciEngine` hook provides a higher-level interface for chess analysis, in
 - Promise-based analysis with proper cleanup
 - Multi-variation support
 - Automatic UCI protocol handling
-
