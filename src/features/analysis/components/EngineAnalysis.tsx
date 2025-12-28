@@ -35,13 +35,14 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
         {analysisData.map((item, index) => (
           <div
             key={index}
-            className={`flex justify-between items-center px-2 py-1 hover:bg-gray-800/50 ${
+            className={`grid grid-cols-[1fr_4rem_6rem] items-center gap-2 px-2 py-1 hover:bg-gray-800/50 ${
               index % 2 === 0 ? 'border-r border-gray-700' : ''
             } ${index >= 2 ? 'border-t border-gray-700' : ''}`}
           >
-            <span className="text-gray-400 truncate mr-2" title={item.engine}>
+            <span className="text-gray-400 truncate" title={item.engine}>
               {item.engine}
             </span>
+            <span className="text-gray-300 font-mono text-center">{item.bestMove}</span>
             <span className="text-right font-mono whitespace-nowrap">
               {formatScore(item.score, item.mate)}
               <span className="text-gray-500">/{item.depth}</span>
