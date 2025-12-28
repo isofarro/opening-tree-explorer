@@ -11,6 +11,6 @@ export const MicroServiceConfig: Record<MicroService, ServiceConfig> = {
     host: 'https://trees.api.chessiq.net',
   },
   [MicroServices.ANALYSIS]: {
-    host: 'http://127.0.0.1:2851',
+    host: 'https://analysis.api.chessiq.net',
   },
 };
