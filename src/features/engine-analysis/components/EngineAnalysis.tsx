@@ -7,9 +7,10 @@ import { formatEval } from '../lib/uci';
 
 type EngineAnalysisProps = {
   position: FenString;
+  renderHeaderStart?: React.ReactNode;
 };
 
-export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
+export const EngineAnalysis = ({ position, renderHeaderStart }: EngineAnalysisProps) => {
   const stockfishEngine = useStockfish();
   const [maxDepth, setMaxDepth] = useState<number>(0);
   const currentAnalysisPosition = useRef<FenString | null>(null);
@@ -46,19 +47,29 @@ export const EngineAnalysis = ({ position }: EngineAnalysisProps) => {
 
   return (
     <section>
-      <header>
-        <div>
+      <header className="flex flex-row justify-between items-center bg-[#262421] p-2 text-sm">
+        <div>{renderHeaderStart}</div>
+        <div className="flex flex-row items-center gap-2">
+          <span className="text-gray-400 text-xs">
+            {isAnalyzing ? 'Analyzing...' : isReady ? 'Ready' : 'Loading...'}
+          </span>
           {isAnalyzing ? (
-            <button onClick={stopAnalysis} disabled={!isAnalyzing}>
-              Stop Analysis
+            <button
+              onClick={stopAnalysis}
+              disabled={!isAnalyzing}
+              className="px-2 py-1 text-xs bg-red-800 hover:bg-red-700 text-white rounded"
+            >
+              Stop
             </button>
           ) : (
-            <button onClick={analyzePosition} disabled={!isReady || isAnalyzing}>
+            <button
+              onClick={analyzePosition}
+              disabled={!isReady || isAnalyzing}
+              className="px-2 py-1 text-xs bg-[#36963e] hover:bg-[#40b34a] text-white rounded"
+            >
               Start Analysis
             </button>
           )}
-          <span>Ready: {isReady.toString()}</span>
-          <span> | Analyzing: {isAnalyzing.toString()}</span>
         </div>
       </header>
       <div>

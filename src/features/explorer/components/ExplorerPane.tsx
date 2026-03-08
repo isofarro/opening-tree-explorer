@@ -35,6 +35,7 @@ export const ExplorerPane = ({
 
   const [currentFen, setCurrentFen] = useState<FenString>(position);
   const [selectedTree, setSelectedTree] = useState<string>(tree);
+  const [orientation, setOrientation] = useState<'white' | 'black'>('white');
 
   // Find the selected tree object
   const selectedTreeObj = trees.find((t) => t.name === selectedTree) || undefined;
@@ -80,6 +81,7 @@ export const ExplorerPane = ({
   };
 
   const boardConfig: ChessgroundConfig = {
+    orientation,
     movable: {
       free: false,
       color: 'both',
@@ -116,7 +118,7 @@ export const ExplorerPane = ({
   };
 
   return (
-    <div className="flex flex-row h-2/3 mt-15">
+    <div className="flex flex-row mt-15">
       <div className="w-[600px]">
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
         <div className="mr-8">
@@ -133,27 +135,41 @@ export const ExplorerPane = ({
         </div>
       </div>
       <div className="tree-table w-[480px] flex flex-col">
-        <div className="flex-[2] border-b border-gray-600 overflow-y-auto">
-          <MovePane
-            rootFen={position}
-            graph={graphRef.current}
-            moveNum={moveNum}
-            onMoveClick={handleSetPosition}
-          />
-        </div>
-        <EngineAnalysis position={gameRef.current.fen()} />
-        <TreeSelector selectedTree={selectedTree} onTreeChange={handleTreeChange} />
-        {currentPos !== undefined && (
-          <div className="flex-[3] overflow-y-auto">
-            <PositionTable
-              treePos={{
-                ...currentPos,
-                moveNumber: currentMoveNum,
-              }}
-              onSelectMove={handleMove}
+        <div className="flex flex-col h-[560px] shrink-0">
+          <div className="flex-[2] border-b border-gray-600 overflow-y-auto">
+            <MovePane
+              rootFen={position}
+              graph={graphRef.current}
+              moveNum={moveNum}
+              onMoveClick={handleSetPosition}
             />
           </div>
-        )}
+          <TreeSelector selectedTree={selectedTree} onTreeChange={handleTreeChange} />
+          {currentPos !== undefined && (
+            <div className="flex-[3] overflow-y-auto">
+              <PositionTable
+                treePos={{
+                  ...currentPos,
+                  moveNumber: currentMoveNum,
+                }}
+                onSelectMove={handleMove}
+              />
+            </div>
+          )}
+        </div>
+        <div>
+          <EngineAnalysis
+            position={gameRef.current.fen()}
+            renderHeaderStart={
+              <button
+                onClick={() => setOrientation((o) => (o === 'white' ? 'black' : 'white'))}
+                className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded"
+              >
+                Flip Board
+              </button>
+            }
+          />
+        </div>
       </div>
     </div>
   );
