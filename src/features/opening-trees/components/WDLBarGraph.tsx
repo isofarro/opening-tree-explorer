@@ -9,44 +9,51 @@ export const WDLBarGraph = ({ wins, draws, losses }: WDLBarGraphProps) => {
 
   if (total === 0) {
     return (
-      <div className="flex items-center justify-center gap-2" title="0/0/0">
-        <div className="w-16 h-4 bg-gray-200 rounded"></div>
-        <span className="text-xs text-gray-500">0%</span>
+      <div className="flex items-center gap-2 w-full justify-center" title="0/0/0">
+        <div className="w-16 h-4 shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-bar-empty)]" />
+        <span className="w-10 shrink-0 text-right text-xs text-[var(--color-on-surface-subtle)] tabular-nums">
+          0%
+        </span>
       </div>
     );
   }
 
-  const winPercentage = (wins / total) * 100;
-  const drawPercentage = (draws / total) * 100;
-  const lossPercentage = (losses / total) * 100;
+  const winPct = (wins / total) * 100;
+  const drawPct = (draws / total) * 100;
+  const lossPct = 100 - winPct - drawPct;
 
-  // Calculate score: wins = 1 point, draws = 0.5 points
-  const score = (wins * 1 + draws * 0.5) / total;
-  const scorePercentage = Math.round(score * 100);
+  const score = (wins + draws * 0.5) / total;
+  const scorePctDisplay = Math.round(score * 100);
+
+  const showWin = wins > 0;
+  const showDraw = draws > 0;
+  const showLoss = losses > 0;
 
   return (
     <div
-      className="flex items-center justify-center gap-2"
+      className="flex items-center gap-2 w-full justify-center"
       title={`${wins} / ${draws} / ${losses}`}
     >
-      <div className="w-16 h-4 flex rounded overflow-hidden border border-gray-300">
-        {winPercentage > 0 && (
-          <div
-            className="bg-white border-r border-gray-400"
-            style={{ width: `${winPercentage}%` }}
-          />
-        )}
-        {drawPercentage > 0 && (
-          <div
-            className="bg-gray-500 border-r border-gray-400"
-            style={{ width: `${drawPercentage}%` }}
-          />
-        )}
-        {lossPercentage > 0 && (
-          <div className="bg-gray-900" style={{ width: `${lossPercentage}%` }} />
-        )}
+      <div
+        className="w-16 h-4 shrink-0 rounded overflow-hidden border border-[var(--color-border)]"
+        role="img"
+        aria-label={`${wins} wins, ${draws} draws, ${losses} losses`}
+      >
+        <div className="w-full h-full flex flex-nowrap">
+          {showWin ? (
+            <div className="bg-[var(--color-win)]" style={{ width: `${winPct}%` }} />
+          ) : null}
+          {showDraw ? (
+            <div className="bg-[var(--color-draw)]" style={{ width: `${drawPct}%` }} />
+          ) : null}
+          {showLoss ? (
+            <div className="bg-[var(--color-loss)]" style={{ width: `${lossPct}%` }} />
+          ) : null}
+        </div>
       </div>
-      <span className="text-xs font-medium">{scorePercentage}%</span>
+      <span className="w-10 shrink-0 text-right text-xs font-medium text-[var(--color-on-surface)] tabular-nums">
+        {scorePctDisplay}%
+      </span>
     </div>
   );
 };
