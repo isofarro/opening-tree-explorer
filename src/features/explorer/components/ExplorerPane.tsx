@@ -234,6 +234,7 @@ export const ExplorerPane = ({
               rootFen={position}
               graph={graphRef.current}
               moveNum={moveNum}
+              currentFen={currentFen}
               onMoveClick={handleSetPosition}
             />
           </div>
