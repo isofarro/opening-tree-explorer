@@ -16,6 +16,7 @@ import { toDests } from '~/features/explorer/lib/moves';
 import { createChessFromFen, normalizeFen } from '~/features/explorer/lib/fen';
 import { EngineAnalysis as CloudAnalysis } from '~/features/analysis/components/EngineAnalysis';
 import { EngineAnalysis } from '~/features/engine-analysis/components/EngineAnalysis';
+import { useTheme } from '~/core/hooks/useTheme';
 
 type ExplorerPaneProps = {
   tree: string;
@@ -32,6 +33,7 @@ export const ExplorerPane = ({
   const graphRef = useRef(new ChessMoveGraph());
   const apiRef = useRef<ChessgroundApi | undefined>(undefined);
   const { trees } = useOpeningTree();
+  const { theme, toggleTheme } = useTheme();
 
   const [currentFen, setCurrentFen] = useState<FenString>(position);
   const [selectedTree, setSelectedTree] = useState<string>(tree);
@@ -121,7 +123,7 @@ export const ExplorerPane = ({
     <div className="flex flex-row mt-15">
       <div className="w-[600px]">
         <Chessground width={560} height={560} ref={apiRef} config={boardConfig} />
-        <div className="mr-8">
+        <div className="mr-8 text-[var(--color-on-surface)]">
           {graphRef.current.getMovePath().map((move, i) => (
             <span key={i}>
               <span className="text-nowrap">
@@ -136,7 +138,7 @@ export const ExplorerPane = ({
       </div>
       <div className="tree-table w-[480px] flex flex-col">
         <div className="flex flex-col h-[560px] shrink-0">
-          <div className="flex-[2] border-b border-gray-600 overflow-y-auto">
+          <div className="flex-[2] border-b border-[var(--color-border)] overflow-y-auto">
             <MovePane
               rootFen={position}
               graph={graphRef.current}
@@ -161,12 +163,21 @@ export const ExplorerPane = ({
           <EngineAnalysis
             position={gameRef.current.fen()}
             renderHeaderStart={
-              <button
-                onClick={() => setOrientation((o) => (o === 'white' ? 'black' : 'white'))}
-                className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded"
-              >
-                Flip Board
-              </button>
+              <div className="flex flex-row gap-2 items-center">
+                <button
+                  onClick={() => setOrientation((o) => (o === 'white' ? 'black' : 'white'))}
+                  className="px-2 py-1 text-xs rounded border border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-on-surface)] hover:bg-[var(--color-hover)] hover:border-[var(--color-border-strong)] transition-colors"
+                >
+                  Flip Board
+                </button>
+                <button
+                  onClick={toggleTheme}
+                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                  className="px-2 py-1 text-xs rounded border border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-on-surface)] hover:bg-[var(--color-hover)] hover:border-[var(--color-border-strong)] transition-colors"
+                >
+                  {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+                </button>
+              </div>
             }
           />
         </div>

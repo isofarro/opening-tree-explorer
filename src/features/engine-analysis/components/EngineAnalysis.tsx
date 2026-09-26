@@ -47,17 +47,17 @@ export const EngineAnalysis = ({ position, renderHeaderStart }: EngineAnalysisPr
 
   return (
     <section>
-      <header className="flex flex-row justify-between items-center bg-[#262421] p-2 text-sm">
+      <header className="flex flex-row justify-between items-center bg-[var(--color-header)] p-2 text-sm border-b border-[var(--color-border)]">
         <div>{renderHeaderStart}</div>
         <div className="flex flex-row items-center gap-2">
-          <span className="text-gray-400 text-xs">
+          <span className="text-[var(--color-on-surface-subtle)] text-xs">
             {isAnalyzing ? 'Analyzing...' : isReady ? 'Ready' : 'Loading...'}
           </span>
           {isAnalyzing ? (
             <button
               onClick={stopAnalysis}
               disabled={!isAnalyzing}
-              className="px-2 py-1 text-xs bg-red-800 hover:bg-red-700 text-white rounded"
+              className="px-2 py-1 text-xs rounded border border-red-700/50 bg-red-600 hover:bg-red-500 text-white transition-colors disabled:opacity-50"
             >
               Stop
             </button>
@@ -65,19 +65,22 @@ export const EngineAnalysis = ({ position, renderHeaderStart }: EngineAnalysisPr
             <button
               onClick={analyzePosition}
               disabled={!isReady || isAnalyzing}
-              className="px-2 py-1 text-xs bg-[#36963e] hover:bg-[#40b34a] text-white rounded"
+              className="px-2 py-1 text-xs rounded border border-green-700/50 bg-green-600 hover:bg-green-500 text-white transition-colors disabled:opacity-50"
             >
               Start Analysis
             </button>
           )}
         </div>
       </header>
-      <div>
+      <div className="text-[var(--color-on-surface)]">
         {currentResults
           .slice(-numVariations)
           .sort((a, b) => (a.multipv || 1) - (b.multipv || 1))
           .map((result) => (
-            <div key={`${result.depth}-${result.multipv || 1}`}>
+            <div
+              key={`${result.depth}-${result.multipv || 1}`}
+              className="px-2 py-1 border-b border-[var(--color-border)] last:border-b-0"
+            >
               <strong>
                 {result.multipv || 1}. {formatEval(result.score, result.scoreType)}/{result.depth}
               </strong>
