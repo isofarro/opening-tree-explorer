@@ -6,6 +6,8 @@ import { normalizeFen } from '~/features/explorer/lib/fen';
 
 type UseTreeProps = {
   currentPos: OpeningTreePosition | undefined;
+  isLoading: boolean;
+  fetchError: string | undefined;
   makeMove: (move: string) => boolean;
   setPosition: (fen: FenString) => boolean;
 };
@@ -13,6 +15,8 @@ type UseTreeProps = {
 export const useTree = (tree: OpeningTree | undefined, startFen: FenString): UseTreeProps => {
   const [currentFen, setCurrentFen] = useState<FenString>(startFen);
   const [currentPos, setCurrentPos] = useState<OpeningTreePosition | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [fetchError, setFetchError] = useState<string | undefined>(undefined);
 
   const positionCache = useRef<Map<string, OpeningTreePosition>>(new Map());
   const fetchingRef = useRef<Set<string>>(new Set());
@@ -29,16 +33,25 @@ export const useTree = (tree: OpeningTree | undefined, startFen: FenString): Use
   const fetchPosition = useCallback(
     async (newFen: FenString) => {
       if (tree === undefined) {
+        setIsLoading(false);
         return;
       }
 
       const normalizedFen = normalizeFen(newFen);
       const cacheKey = `${tree.name}-${normalizedFen}`;
 
+      // Clear stale position and previous error before resolving new FEN, so the
+      // UI never shows results from a different position while loading or if
+      // this position turns out to be empty / missing from the opening book.
+      setCurrentPos(undefined);
+      setFetchError(undefined);
+      setIsLoading(true);
+
       // Check if position is in cache
       const cachedPosition = positionCache.current.get(cacheKey);
       if (cachedPosition) {
         updatePosition(cachedPosition, newFen, 'Cache hit');
+        setIsLoading(false);
         return;
       }
 
@@ -54,8 +67,13 @@ export const useTree = (tree: OpeningTree | undefined, startFen: FenString): Use
         const treePosition = await Api.openingTrees.getPositionByFen(tree, normalizedFen);
         positionCache.current.set(cacheKey, treePosition);
         updatePosition(treePosition, normalizedFen, 'getPositionByFen');
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        console.error('Failed to fetch opening tree position:', message);
+        setFetchError(message);
       } finally {
         fetchingRef.current.delete(cacheKey);
+        setIsLoading(false);
       }
     },
     [tree, updatePosition]
@@ -66,8 +84,8 @@ export const useTree = (tree: OpeningTree | undefined, startFen: FenString): Use
       return;
     }
     console.log('[USEEFFECT] fetchPosition', tree);
-    fetchPosition(currentFen);
-  }, [currentFen, tree]);
+    void fetchPosition(currentFen);
+  }, [currentFen, tree, fetchPosition]);
 
   const makeMove = (move: string): boolean => {
     // Find the move in the current position info
@@ -85,6 +103,8 @@ export const useTree = (tree: OpeningTree | undefined, startFen: FenString): Use
 
   return {
     currentPos,
+    isLoading,
+    fetchError,
     makeMove,
     setPosition,
   };
