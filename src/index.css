@@ -116,7 +116,7 @@
 
 @layer components {
   .move-pane {
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.625rem;
     color: var(--color-on-surface);
     font-size: 0.875rem;
     line-height: 1.6;

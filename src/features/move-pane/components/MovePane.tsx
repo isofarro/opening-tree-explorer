@@ -19,11 +19,7 @@ export const MovePane = ({ rootFen, graph, moveNum, currentFen, onMoveClick }: M
   const baseBoxCls = 'cursor-pointer whitespace-nowrap inline-block rounded-md px-1.5 py-[2px]';
   const highlightBgCls = 'bg-indigo-100 text-indigo-900 dark:bg-indigo-200 dark:text-slate-900';
 
-  const renderMoves = (
-    fen: FenString,
-    currentMoveNum: number,
-    isFirstMove = false
-  ): JSX.Element | null => {
+  const renderMoves = (fen: FenString, currentMoveNum: number): JSX.Element | null => {
     const position = graph.findPosition(fen);
     if (!position || position.moves.length === 0) {
       return null;
@@ -42,7 +38,7 @@ export const MovePane = ({ rootFen, graph, moveNum, currentFen, onMoveClick }: M
 
     return (
       <>
-        <span className={`move ${isFirstMove ? 'ml-0' : 'ml-0.5'}`}>
+        <span className="move pl-0.5">
           {moveNumStr}
           <span
             className={`ml-0 ${baseBoxCls} ${firstIsCurrent ? highlightBgCls : ''}`}
@@ -73,10 +69,10 @@ export const MovePane = ({ rootFen, graph, moveNum, currentFen, onMoveClick }: M
             ){' '}
           </span>
         )}
-        {renderMoves(firstMove.toFen, isWhiteMove ? currentMoveNum : currentMoveNum + 1, false)}
+        {renderMoves(firstMove.toFen, isWhiteMove ? currentMoveNum : currentMoveNum + 1)}
       </>
     );
   };
 
-  return <div className="move-pane">{renderMoves(rootFen, moveNum, true)}</div>;
+  return <div className="move-pane">{renderMoves(rootFen, moveNum)}</div>;
 };
